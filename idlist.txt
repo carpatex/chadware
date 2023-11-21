@@ -22,4 +22,4 @@
 22 stone4
 23 stone5
 24 stone6
-25 stone7
+25 stone7	
