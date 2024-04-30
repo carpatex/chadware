@@ -20,7 +20,7 @@ int main () {
 	mvwprintw(info_win, 1, 1, "%d %d", getmaxx(stdscr), getmaxy(stdscr));
 	wrefresh(main_win);
 	wrefresh(info_win);
-
+	/*deja de hacer commits que los representas mal*/
 	getch();
 	endwin();
 	return 0;
