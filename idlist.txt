@@ -1,3 +1,4 @@
+# dummy_test
 0 air
 1 grass0
 2 grass1
