@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-typedef struct chunk {
+typedef struct {
 	int32_t tile[16][16];
 	int16_t extra_tile[16][16];
 	void** entity;

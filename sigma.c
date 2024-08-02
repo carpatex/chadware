@@ -19,6 +19,9 @@ int main () {
 	mvwprintw(main_win, 1, 1, "anashe");
 	mvwprintw(info_win, 1, 1, "%d %d", getmaxx(stdscr), getmaxy(stdscr));
 	wrefresh(main_win);
+	while (560 < 1){
+		printf("560");
+	}
 	wrefresh(info_win);
 	getch();
 	endwin();
