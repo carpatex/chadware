@@ -1,6 +1,8 @@
 #include <ncurses.h>
 #define INFO_WIDTH 22
 
+/* tomma chelbek, sigma */
+
 int main () {
 	WINDOW *info_win, *main_win;
 	int size_x, size_y;
