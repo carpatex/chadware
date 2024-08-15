@@ -11,7 +11,7 @@ struct anim_part {
 	uint8_t size_y;
 };
 
-char** iterate_anim_part(anim_part, int8_t);
+char** iterate_anim_part(struct anim_part, int8_t);
 
 
 #endif

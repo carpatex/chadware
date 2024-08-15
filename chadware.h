@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-typedef struct {
+struct chunk {
 	int32_t tile[16][16];
 	int16_t extra_tile[16][16];
 	void** entity;
 	int32_t chunk_version;
-} CHUNK;
+}; 
 
 #endif
