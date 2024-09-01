@@ -1,11 +1,15 @@
-CC=cc
-CFLAGS=-Wall -g
-OBJECTS_COMMON = chadware.c
-OBJECTS_CLIENT = $(OBJECTS_COMMON) client.c
-LIBS_CLIENT = -lncurses
+CC := cc
+CFLAGS := -Wall -g
+INCLUDE := -I.
+OBJECTS_COMMON := chadware.o
+OBJECTS_CLIENT := $(OBJECTS_COMMON) client.o
+LIBS_CLIENT := -lncurses -ltinfo
 
-client: $(OBJECTS_COMMON) $(OBJECTS_CLIENT)
-	$(CC) $(CFLAGS) $(OBJECTS_CLIENT) -o chadware
+
+client: $(OBJECTS_CLIENT) 
+	$(CC) $(inputs) -o chadware $(LIBS_CLIENT)
+%.o: %.c
+	$(CC) $(INCLUDE) $(CFLAGS) -c $(input) -o $(output)
 
 clean:
 	rm -rf *.o chadware chadserver debug_print
