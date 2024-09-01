@@ -33,7 +33,7 @@ void* init_heap_chadware(const size_t heap_size){
 		chunk_ptr = heap + (4 * sizeof(void *));
 		entity_ptr = heap + (5 * sizeof(void *));
 		
-		*heapsize_ptr = (void *) heap_size;
+		*heapsize_ptr = heap + heap_size;
 		*globalvar_ptr = heap;
 		*datain_ptr = heap + ((GLOBALVAR_PROPORTION * heap_size) / 100);
 		*dataout_ptr = *datain_ptr + ((DATAIN_PROPORTION * heap_size) / 100);
@@ -54,4 +54,13 @@ void* init_heap_chadware(const size_t heap_size){
 
 int tick(int n_op, int* op) {
 	return 0;
+}
+
+void debug_print_ptrs() {
+	printf("heapsize_ptr %p\n", *heapsize_ptr);
+	printf("globalvar_ptr %p\n", *globalvar_ptr);
+	printf("datain_ptr %p\n", *datain_ptr);
+	printf("dataout_ptr %p\n", *dataout_ptr);
+	printf("chunk_ptr %p\n", *chunk_ptr);
+	printf("entity_ptr %p\n", *entity_ptr);
 }

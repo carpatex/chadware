@@ -12,4 +12,7 @@ struct chunk {
 	int32_t chunk_version;
 }; 
 
+void* init_heap_chadware(size_t);
+void debug_print_ptrs();
+
 #endif
