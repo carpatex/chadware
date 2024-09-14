@@ -11,7 +11,7 @@ struct chunk {
 	void** entity;
 	int32_t chunk_version;
 }; 
-
+int tick(int, int *);
 void* init_heap_chadware(size_t);
 void debug_print_ptrs();
 
