@@ -27,9 +27,9 @@ void compress_chunk32(struct Chunk *chunk, int* packed_values_used, int max_pack
 				result[count].end_pos_y = end_y - 1;
         if (count >= max_packed_values) {
 	        *packed_values_used = count;
-          return;
+		return;
         } else {
-				  count++;
+		count++;
         }
 			}
 		}
