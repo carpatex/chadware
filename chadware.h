@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
 
 struct Chunk {
 	int32_t tile[16][16];
