@@ -32,7 +32,7 @@ void* init_heap_chadware(const size_t heap_size){
 		dataout_ptr = heap + (3 * sizeof(void *));
 		chunk_ptr = heap + (4 * sizeof(void *));
 		entity_ptr = heap + (5 * sizeof(void *));
-		
+
 		*heapsize_ptr = heap + heap_size;
 		*globalvar_ptr = heap;
 		*datain_ptr = heap + ((GLOBALVAR_PROPORTION * heap_size) / 100);
