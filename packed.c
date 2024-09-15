@@ -1,5 +1,4 @@
 #include "chadware.h"
-#include <stdint.h>
 
 #define CHUNK_N_TILES 16
 
