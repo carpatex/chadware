@@ -40,11 +40,15 @@ void compress_chunk32(struct Chunk *chunk, int* packed_values_used, int max_pack
 				result[count].start_pos_y = start_y;
 				result[count].end_pos_x = end_x - 1;
 				result[count].end_pos_y = end_y - 1;
-				count++;
+        if (count >= max_packed_values) {
+	        *packed_values_used = count;
+          return;
+        } else {
+				  count++;
+        }
 			}
 		}
 	}
-
 	*packed_values_used = count;
 }
 
