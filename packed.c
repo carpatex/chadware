@@ -2,21 +2,6 @@
 
 #define CHUNK_N_TILES 16
 
-struct PackedValues16 {
-	int16_t value;
-	int8_t start_pos_x;
-	int8_t start_pos_y;
-	int8_t end_pos_x;
-	int8_t end_pos_y;
-};
-struct PackedValues32 {
-	int32_t value;
-	int8_t start_pos_x;
-	int8_t start_pos_y;
-	int8_t end_pos_x;
-	int8_t end_pos_y;
-};
-
 void compress_chunk32(struct Chunk *chunk, int* packed_values_used, int max_packed_values, struct PackedValues32* result) {
 	int i, j, start_x, start_y, end_x, end_y, count = 0;
 	int32_t value;
