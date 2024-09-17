@@ -63,8 +63,8 @@ void compress_chunk16(struct LoadedChunk *chunk, int *packed_values_used, int ma
 
 	for (i = 0; i < CHUNK_N_TILES; i++) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
-			if (i == 0 || j == 0 || (chunk)->tile[i][j] != (chunk)->tile[i - 1][j] ||
-					(chunk)->tile[i][j] != (chunk)->tile[i][j - 1]) {
+			if (i == 0 || j == 0 || (chunk)->extra_tile[i][j] != (chunk)->extra_tile[i - 1][j] ||
+					(chunk)->extra_tile[i][j] != (chunk)->extra_tile[i][j - 1]) {
 				start_x = i;
 				start_y = j;
 				end_x = i;
@@ -72,9 +72,9 @@ void compress_chunk16(struct LoadedChunk *chunk, int *packed_values_used, int ma
 				value = (chunk)->extra_tile[i][j];
 
 				// Buscar coincidencias hacia abajo y derecha
-				while (end_x < CHUNK_N_TILES && (chunk)->tile[end_x][j] == value)
+				while (end_x < CHUNK_N_TILES && (chunk)->extra_tile[end_x][j] == value)
 					end_x++;
-				while (end_y < CHUNK_N_TILES && (chunk)->tile[i][end_y] == value)
+				while (end_y < CHUNK_N_TILES && (chunk)->extra_tile[i][end_y] == value)
 					end_y++;
 
 				// Añadir coincidencia a resultado
@@ -106,7 +106,7 @@ void decompress_chunk16(struct PackedValues16 *packed_values, int n_packed_value
 		value = packed_values[i].value;
 		for (x = start_x; x <= end_x; x++) {
 			for (y = start_y; y <= end_y; y++) {
-				(chunk)->tile[x][y] = value;
+				(chunk)->extra_tile[x][y] = value;
 			}
 		}
 	}
