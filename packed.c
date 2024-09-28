@@ -7,8 +7,7 @@ void compress_chunk32(struct LoadedChunk *chunk, int *packed_values_used, int ma
 	int32_t value;
 	for (i = 0; i < CHUNK_N_TILES; i++) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
-			if (i == 0 || j == 0 || (chunk)->tile[i][j] != (chunk)->tile[i - 1][j] ||
-					(chunk)->tile[i][j] != (chunk)->tile[i][j - 1]) {
+			if (i == 0 || j == 0 || (chunk)->tile[i][j] != (chunk)->tile[i - 1][j] || (chunk)->tile[i][j] != (chunk)->tile[i][j - 1]) {
 				start_x = i;
 				start_y = j;
 				end_x = i;
@@ -64,7 +63,7 @@ void compress_chunk16(struct LoadedChunk *chunk, int *packed_values_used, int ma
 	for (i = 0; i < CHUNK_N_TILES; i++) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
 			if (i == 0 || j == 0 || (chunk)->extra_tile[i][j] != (chunk)->extra_tile[i - 1][j] ||
-					(chunk)->extra_tile[i][j] != (chunk)->extra_tile[i][j - 1]) {
+				(chunk)->extra_tile[i][j] != (chunk)->extra_tile[i][j - 1]) {
 				start_x = i;
 				start_y = j;
 				end_x = i;
