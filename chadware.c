@@ -1,8 +1,8 @@
 #include "chadware.h"
-static const size_t GLOBALVAR_PROPORTION = 5;
-static const size_t DATAIN_PROPORTION = 10;
-static const size_t DATAOUT_PROPORTION = 10;
-static const size_t CHUNK_PROPORTION = 35;
+#define GLOBALVAR_PROPORTION 5;
+#define DATAIN_PROPORTION 10;
+#define DATAOUT_PROPORTION 10;
+#define CHUNK_PROPORTION 35;
 /* static const ENTITY_PROPORTION = 40; */ 
 /* este no va porque es al 
 	 pedo ya que al ser el último se lleva el resto de la memoria
