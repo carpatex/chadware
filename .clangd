@@ -1,0 +1,18 @@
+If:
+  PathMatch: .*\.cpp
+
+CompileFlags:
+  Add: [-std=c++11]
+
+---
+
+If:
+  PathMatch: .*\.c
+
+CompileFlags:
+  Add: [-std=c99]
+
+If: PathMatch: .*\.h
+CompileFlags:
+	Add: [-std=c99]
+	Add: [-xc-header]
