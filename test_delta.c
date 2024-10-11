@@ -2,10 +2,10 @@
 #include <time.h>
 #define TPS_OBJECTIVE 20
 #define NEXT_TICK CLOCKS_PER_SEC / TPS_OBJECTIVE 
-void tick() { //algo random que suma hasta un numero basado 
+void tick() {
 	int j;
 	j = 0;
-	while (j < 6969)
+	while (j < 777)
 		j++;
 }
 
