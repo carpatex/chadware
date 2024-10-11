@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <time.h>
-#define TPS_OBJECTIVE 64.0
+#define TPS_OBJECTIVE 20.0
 #define NEXT_TICK CLOCKS_PER_SEC / TPS_OBJECTIVE 
 void operacion() { //algo random que suma hasta una suma determinada 
 	int i, j;
