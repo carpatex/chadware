@@ -8,6 +8,7 @@
 #include <time.h>
 #define PLAYER_NAME_SIZE 64
 #define CHUNK_N_TILES 16
+#define SUBMOTION_CONSTANT 16 
 struct ChunkLocator {
 	int16_t dimension; // dimensions: there are 3: -1 for HELL, 0 for SPACE, 1 for HEAVEN
 	int32_t galaxy; // Galaxy, only applies literally to SPACE, but it can have another use on HEAVEN or HELL
