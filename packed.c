@@ -1,9 +1,7 @@
 #include "chadware.h"
 
-#define CHUNK_N_TILES 16
-
-void compress_chunk32(struct LoadedChunk *chunk, int *packed_values_used, int max_packed_values, struct PackedValues32 *result) {
-	int i, j, start_x, start_y, end_x, end_y, count = 0;
+void compress_chunk32(struct LoadedChunk *chunk, int16_t *packed_values_used, int16_t max_packed_values, struct PackedValues32 *result) {
+	int16_t i, j, start_x, start_y, end_x, end_y, count = 0;
 	int32_t value;
 	for (i = 0; i < CHUNK_N_TILES; i++) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
@@ -38,8 +36,8 @@ void compress_chunk32(struct LoadedChunk *chunk, int *packed_values_used, int ma
 	*packed_values_used = count;
 }
 
-void decompress_chunk32(struct PackedValues32 *packed_values, int n_packed_values, struct LoadedChunk *chunk) {
-	int i, start_x, start_y, end_x, end_y;
+void decompress_chunk32(struct PackedValues32 *packed_values, int16_t n_packed_values, struct LoadedChunk *chunk) {
+	int16_t i, start_x, start_y, end_x, end_y;
 	int32_t value;
 	for (i = 0; i < n_packed_values; i++) {
 		start_x = packed_values[i].start_pos_x;
@@ -48,7 +46,7 @@ void decompress_chunk32(struct PackedValues32 *packed_values, int n_packed_value
 		end_y = packed_values[i].end_pos_y;
 		value = packed_values[i].value;
 
-		int x, y;
+		int16_t x, y;
 		for (x = start_x; x <= end_x; x++) {
 			for (y = start_y; y <= end_y; y++) {
 				(chunk)->tile[x][y] = value;
@@ -56,8 +54,8 @@ void decompress_chunk32(struct PackedValues32 *packed_values, int n_packed_value
 		}
 	}
 }
-void compress_chunk16(struct LoadedChunk *chunk, int *packed_values_used, int max_packed_values, struct PackedValues16 *result) {
-	int i, j, start_x, start_y, end_x, end_y, count = 0;
+void compress_chunk16(struct LoadedChunk *chunk, int16_t *packed_values_used, int16_t max_packed_values, struct PackedValues16 *result) {
+	int16_t i, j, start_x, start_y, end_x, end_y, count = 0;
 	int16_t value;
 
 	for (i = 0; i < CHUNK_N_TILES; i++) {
@@ -94,8 +92,8 @@ void compress_chunk16(struct LoadedChunk *chunk, int *packed_values_used, int ma
 	*packed_values_used = count;
 }
 
-void decompress_chunk16(struct PackedValues16 *packed_values, int n_packed_values, struct LoadedChunk *chunk) {
-	int x, y, i, start_x, start_y, end_x, end_y;
+void decompress_chunk16(struct PackedValues16 *packed_values, int16_t n_packed_values, struct LoadedChunk *chunk) {
+	int16_t x, y, i, start_x, start_y, end_x, end_y;
 	int16_t value;
 	for (i = 0; i < n_packed_values; i++) {
 		start_x = packed_values[i].start_pos_x;

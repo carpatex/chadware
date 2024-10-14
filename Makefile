@@ -1,7 +1,7 @@
 CC := cc
 CFLAGS := -Wall -g
 INCLUDE := -I.
-OBJECTS_COMMON := chadware.o
+OBJECTS_COMMON := chadware.o entity.o
 OBJECTS_CLIENT := $(OBJECTS_COMMON) client.o
 OBJECTS_DEBUG := $(OBJECTS_COMMON) debug.o
 LIBS_CLIENT := -lncurses -ltinfo
