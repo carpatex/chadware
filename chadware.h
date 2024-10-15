@@ -116,7 +116,7 @@ void decompress_chunk32(struct PackedValues32 *, int, struct LoadedChunk *);
 void decompress_chunk16(struct PackedValues16 *, int, struct LoadedChunk *);
 
 int32_t tick(int32_t, struct Event*, int32_t *, struct Event*);
-int32_t handleMotionEvent(struct MotionEvent*);
+void handleMotionEvent(struct MotionEvent*);
 size_t init_heap_chadware(size_t);
 void debug_print_ptrs();
 
