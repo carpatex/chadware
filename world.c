@@ -1,5 +1,9 @@
 #include "chadware.h"
 
+void findLimits(int *limit_x, int *limit_y, struct ChunkLocator* target_chunk) {
+	if (target_chunk->subsurface)
+}
+
 void compress_chunk32(struct LoadedChunk *chunk, int16_t *packed_values_used, int16_t max_packed_values, struct PackedValues32 *result) {
 	int16_t i, j, start_x, start_y, end_x, end_y, count = 0;
 	int32_t value;

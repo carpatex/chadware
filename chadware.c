@@ -2,7 +2,7 @@
 #define GLOBALVAR_PROPORTION 5
 #define DATAIN_PROPORTION 10
 #define DATAOUT_PROPORTION 10
-#define GALAXY_TABLE 2
+#define TOPLEVEL_TERRAIN_PROPORTION 10 
 #define CHUNK_PROPORTION 25
 #define ENTITYGENERIC_PROPORTION 5
 #define ENTITY_PROPORTION 35
@@ -10,18 +10,23 @@
 size_t heap_size;
 size_t eventg_in_size;
 size_t eventg_out_size;
+size_t toplevel_terrain_size;
 size_t chunk_size;
 size_t entityg_size;
 size_t entity_size;
+
 void *heap;
 void *v_eventg_in_ptr;
 void *v_eventg_out_ptr;
+void *v_toplevel_terrain_ptr;
 void *v_chunk_ptr;
 void *v_entityg_ptr;
 void *v_entity_ptr;
 void *heapend_ptr;
+
 struct EventGeneric* eventg_in_ptr;
 struct EventGeneric* eventg_out_ptr;
+struct ToplevelTerrain* toplevel_terrain_ptr;
 struct EntityGeneric* entityg_ptr;
 // pointers to multiple sections of heap. A single pointer points to the only section of reserved memory.
 // This is done to avoid having to reserve more memory each time the game needs more. 
@@ -34,20 +39,21 @@ size_t init_heap_chadware(const size_t intended_heap_size){
 	entityg_size = ((ENTITYGENERIC_PROPORTION * intended_heap_size) / 100) + ((ENTITYGENERIC_PROPORTION * intended_heap_size) % 100);
 	entity_size = ((ENTITY_PROPORTION * intended_heap_size) / 100) + ((ENTITY_PROPORTION * intended_heap_size) % 100);
 
-
 	if (eventg_in_size % sizeof(struct EventGeneric)) { // adding enough bytes if division between proportions aren't exact.
 		eventg_in_size += sizeof(struct EventGeneric) - eventg_in_size % sizeof(struct EventGeneric);
 	}
-
 	if (eventg_out_size % sizeof(struct EventGeneric)) { // adding enough bytes if division between proportions aren't exact.
 		eventg_out_size += sizeof(struct EventGeneric) - eventg_out_size % sizeof(struct EventGeneric);
+	}
+	if (toplevel_terrain_size % sizeof(struct ToplevelTerrain)) { // adding enough bytes if division between proportions aren't exact.
+		toplevel_terrain_size += sizeof(struct ToplevelTerrain) - toplevel_terrain_size % sizeof(struct ToplevelTerrain);
 	}
 	if (entityg_size % sizeof(struct EntityGeneric)) { // adding enough bytes if division between proportions aren't exact.
 		entityg_size += sizeof(struct EntityGeneric) - entityg_size % sizeof(struct EntityGeneric);
 	}
 
 
-	heap_size = eventg_in_size + eventg_out_size + chunk_size + entityg_size + entity_size;
+	heap_size = eventg_in_size + eventg_out_size + toplevel_terrain_size + chunk_size + entityg_size + entity_size;
 
 	heap = calloc(1, heap_size);
 	if (heap == NULL) {

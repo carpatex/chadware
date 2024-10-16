@@ -1,31 +1,47 @@
 #ifndef CHADWARE_H
 #define CHADWARE_H
-#define max(X, Y) ((X) > (Y) ? (X) : (Y))
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#define max(X, Y) ((X) > (Y) ? (X) : (Y))
+#define min(X, Y) ((X) < (Y) ? (X) : (Y))
+
 #define PLAYER_NAME_SIZE 64
 #define CHUNK_N_TILES 16
 #define SUBMOTION_CONSTANT 16 
-struct ChunkLocator {
-	int16_t dimension; // dimensions: there are 3: -1 for HELL, 0 for SPACE, 1 for HEAVEN
-	int32_t galaxy; // Galaxy, only applies literally to SPACE, but it can have another use on HEAVEN or HELL
-	int32_t system; // same as above, in the case of SPACE it represents planetary systems which contain orbits.
-	int8_t orbit; // same as above, in the case of SPACE it represents the orbits of planets, including the planet itself, satellites and asteroids.
-	int32_t surface; // last mandatory layer, it can be satellites, asteroids, or planets.
-	int32_t subsurface; // For vehicles only, 0 is the base surface. It shares entities with surface.
+
+struct ChunkLocator { 
+	int8_t dimension; // dimensions: there are 3: -1 for HELL, 0 for SPACE, 1 for HEAVEN
+	uint32_t galaxy; // Galaxy, only applies literally to SPACE, but it can have another use on HEAVEN or HELL
+	uint32_t planetary_system; // same as above, in the case of SPACE it represents planetary systems which contain orbits.
+	uint32_t orbit; // same as above, in the case of SPACE it represents the orbits of planets, including the planet itself, satellites and asteroids.
+	uint32_t surface; // last mandatory layer, it can be satellites, asteroids, or planets.
+	uint32_t subsurface; // For interiors and vehicles only, 0 is the base surface. It shares entities with surface.
 	int32_t start_pos_x;
 	int32_t start_pos_y;
 };
-struct Galaxy {
-	int32_t n_systems;
-	int32_t id;
+struct ToplevelTerrain {	
+	uint32_t parent_id;
+	uint32_t id; // global_id, is the same as the dimension, galaxy, planetary_system,
+							// surface and subsurface members according to what below is.
+	int8_t hierarchy_type; // the hierarchy type (0 for dimension, 1 for galaxy, 
+												 // 2 for planetary_system and so on)
+	int32_t w_limit_x; // western limit for the x axis
+	int32_t n_limit_y; // northern limit for the Y axis
+	int32_t e_limit_x; // eastern limit for the X axis 
+	int32_t s_limit_y; // southern limit for the Y axis
+
+	int32_t n_sublevels;
+	struct ToplevelTerrain* sublevels; // amount of members
 };
 struct LoadedChunk {
 	int32_t tile[CHUNK_N_TILES][CHUNK_N_TILES];
 	int16_t extra_tile[CHUNK_N_TILES][CHUNK_N_TILES];
+	struct ChunkLocator location;
 };
 struct PackedValues16 {
 	int16_t value;
@@ -96,6 +112,7 @@ struct MotionEvent { // struct for movement of entities &/or players
 extern size_t heap_size;
 extern size_t eventg_in_size;
 extern size_t eventg_out_size;
+extern size_t toplevel_terrain_size;
 extern size_t chunk_size;
 extern size_t entityg_size;
 extern size_t entity_size;
@@ -103,20 +120,24 @@ extern size_t entity_size;
 extern void *heap;
 extern void *v_eventg_in_ptr;
 extern void *v_eventg_out_ptr;
+extern void *v_toplevel_terrain_ptr;
 extern void *v_chunk_ptr;
 extern void *v_entityg_ptr;
 extern void *v_entity_ptr;
 extern void *heapend_ptr;
-extern int32_t curr_tick_epoch;
-extern int32_t curr_tick;
+
 extern struct EventGeneric* eventg_in_ptr;
 extern struct EventGeneric* eventg_out_ptr;
+extern struct ToplevelTerrain* toplevel_terrain_ptr;
 extern struct EntityGeneric* entityg_ptr;
 
-void compress_chunk32(struct LoadedChunk *, int *, int, struct PackedValues32 *);
-void compress_chunk16(struct LoadedChunk *, int *, int, struct PackedValues16 *);
-void decompress_chunk32(struct PackedValues32 *, int, struct LoadedChunk *);
-void decompress_chunk16(struct PackedValues16 *, int, struct LoadedChunk *);
+extern int32_t curr_tick_epoch;
+extern int32_t curr_tick;
+
+void compress_chunk32(struct LoadedChunk *, int16_t *, int16_t, struct PackedValues32 *);
+void compress_chunk16(struct LoadedChunk *, int16_t *, int16_t, struct PackedValues16 *);
+void decompress_chunk32(struct PackedValues32 *, int16_t, struct LoadedChunk *);
+void decompress_chunk16(struct PackedValues16 *, int16_t, struct LoadedChunk *);
 
 int32_t tick(int32_t, struct EventGeneric*, int32_t *, struct EventGeneric*);
 void handleMotionEvent(struct MotionEvent*);

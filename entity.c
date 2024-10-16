@@ -12,8 +12,22 @@ struct EntityGeneric* findEntity(struct ChunkLocator* location, struct EntityIde
 
 void moveEntity(int32_t x_motion, int8_t x_sub_motion, int32_t y_motion, int8_t y_sub_motion, struct EntityPositionSurface* eps_ptr) {
 	int32_t i;
-	int8_t x_sub_motion_r = (x_sub_motion + eps_ptr->motion_pos_x) % SUBMOTION_CONSTANT;
-	int8_t y_sub_motion_r = (y_sub_motion + eps_ptr->motion_pos_y) % SUBMOTION_CONSTANT;
+
+
+	if((x_sub_motion + eps_ptr->motion_pos_x) % SUBMOTION_CONSTANT < 0) {
+		int8_t x_sub_motion_r = 0 - ((x_sub_motion + eps_ptr->motion_pos_x) % SUBMOTION_CONSTANT);
+	}
+	else {
+		int8_t x_sub_motion_r = (x_sub_motion + eps_ptr->motion_pos_x) % SUBMOTION_CONSTANT;
+	}
+
+	if((y_sub_motion + eps_ptr->motion_pos_y) % SUBMOTION_CONSTANT < 0) {
+		int8_t y_sub_motion_r = 0 - ((y_sub_motion + eps_ptr->motion_pos_y) % SUBMOTION_CONSTANT);
+	}
+	else {
+		int8_t y_sub_motion_r = (y_sub_motion + eps_ptr->motion_pos_y) % SUBMOTION_CONSTANT;
+	}
+
 	eps_ptr->pos_x += x_motion + (int32_t) ((x_sub_motion + eps_ptr->motion_pos_x) / SUBMOTION_CONSTANT);
 	eps_ptr->pos_y += y_motion + (int32_t) ((y_sub_motion + eps_ptr->motion_pos_y) / SUBMOTION_CONSTANT);
 }
