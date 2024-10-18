@@ -1,6 +1,6 @@
 #include "chadware.h"
 
-void findLimits(int *limit_x, int *limit_y, struct ChunkLocator* target_chunk) {
+void findLimits(int *limit_x, int *limit_y, struct Locator* target_chunk) {
 	if (target_chunk->subsurface)
 }
 

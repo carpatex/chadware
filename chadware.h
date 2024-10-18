@@ -14,16 +14,14 @@
 #define CHUNK_N_TILES 16
 #define SUBMOTION_CONSTANT 16 
 
-struct ChunkLocator { 
+struct Locator { 
 	int8_t dimension; // dimensions: there are 3: -1 for HELL, 0 for SPACE, 1 for HEAVEN
 	uint32_t galaxy; // Galaxy, only applies literally to SPACE, but it can have another use on HEAVEN or HELL
 	uint32_t planetary_system; // same as above, in the case of SPACE it represents planetary systems which contain orbits.
 	uint32_t orbit; // same as above, in the case of SPACE it represents the orbits of planets, including the planet itself, satellites and asteroids.
 	uint32_t surface; // last mandatory layer, it can be satellites, asteroids, or planets.
 	uint32_t subsurface; // For interiors and vehicles only, 0 is the base surface. It shares entities with surface.
-	int32_t start_pos_x;
-	int32_t start_pos_y;
-};
+	};
 struct ToplevelTerrain {	
 	uint32_t parent_id;
 	uint32_t id; // global_id, is the same as the dimension, galaxy, planetary_system,
@@ -36,12 +34,14 @@ struct ToplevelTerrain {
 	int32_t s_limit_y; // southern limit for the Y axis
 
 	int32_t n_sublevels;
-	struct ToplevelTerrain* sublevels; // amount of members
+	struct Locator hierarchy;
 };
 struct LoadedChunk {
 	int32_t tile[CHUNK_N_TILES][CHUNK_N_TILES];
 	int16_t extra_tile[CHUNK_N_TILES][CHUNK_N_TILES];
-	struct ChunkLocator location;
+	struct Locator location;
+	int32_t start_pos_x;
+	int32_t start_pos_y;
 };
 struct PackedValues16 {
 	int16_t value;
@@ -71,7 +71,7 @@ struct EntityPositionSurface {
 };
 
 struct EntityGeneric {
-	struct ChunkLocator location;
+	struct Locator location;
 	struct EntityIdentifier identifier;
 	struct EntityPositionSurface pos;
 	size_t size;
@@ -100,7 +100,7 @@ struct EventGeneric { //general struct for events. each particular type of event
 	void *data;
 };
 struct MotionEvent { // struct for movement of entities &/or players
-	struct ChunkLocator location;
+	struct Locator location;
 	struct EntityIdentifier id;
 	int32_t height_motion;
 	int32_t x_motion;
