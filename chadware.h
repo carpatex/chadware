@@ -23,18 +23,16 @@ struct Locator {
 	uint32_t subsurface; // For interiors and vehicles only, 0 is the base surface. It shares entities with surface.
 	};
 struct ToplevelTerrain {	
-	uint32_t parent_id;
-	uint32_t id; // global_id, is the same as the dimension, galaxy, planetary_system,
-							// surface and subsurface members according to what below is.
 	int8_t hierarchy_type; // the hierarchy type (0 for dimension, 1 for galaxy, 
 												 // 2 for planetary_system and so on)
+	struct Locator hierarchy;
+	
 	int32_t w_limit_x; // western limit for the x axis
 	int32_t n_limit_y; // northern limit for the Y axis
 	int32_t e_limit_x; // eastern limit for the X axis 
 	int32_t s_limit_y; // southern limit for the Y axis
 
-	int32_t n_sublevels;
-	struct Locator hierarchy;
+	uint32_t n_sublevels;
 };
 struct LoadedChunk {
 	int32_t tile[CHUNK_N_TILES][CHUNK_N_TILES];
@@ -100,8 +98,7 @@ struct EventGeneric { //general struct for events. each particular type of event
 	void *data;
 };
 struct MotionEvent { // struct for movement of entities &/or players
-	struct Locator location;
-	struct EntityIdentifier id;
+	struct EntityGeneric *target;
 	int32_t height_motion;
 	int32_t x_motion;
 	int8_t x_sub_motion;
@@ -117,6 +114,11 @@ extern size_t chunk_size;
 extern size_t entityg_size;
 extern size_t entity_size;
 
+extern size_t n_eventg_in;
+extern size_t n_eventg_out;
+extern size_t n_toplevel_terrain;
+extern size_t n_entityg;
+
 extern void *heap;
 extern void *v_eventg_in_ptr;
 extern void *v_eventg_out_ptr;
@@ -131,8 +133,8 @@ extern struct EventGeneric* eventg_out_ptr;
 extern struct ToplevelTerrain* toplevel_terrain_ptr;
 extern struct EntityGeneric* entityg_ptr;
 
-extern int32_t curr_tick_epoch;
-extern int32_t curr_tick;
+extern uint32_t curr_tick_epoch;
+extern uint32_t curr_tick;
 
 void compress_chunk32(struct LoadedChunk *, int16_t *, int16_t, struct PackedValues32 *);
 void compress_chunk16(struct LoadedChunk *, int16_t *, int16_t, struct PackedValues16 *);

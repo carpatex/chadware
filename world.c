@@ -1,7 +1,12 @@
 #include "chadware.h"
 
-void findLimits(int *limit_x, int *limit_y, struct Locator* target_chunk) {
-	if (target_chunk->subsurface)
+struct ToplevelTerrain* findToplevel(struct Locator *location) {
+	size_t i;
+	for (i = 0; i < n_toplevel_terrain; i++) {
+		if (!memcmp(location, &toplevel_terrain_ptr[i].hierarchy, sizeof(struct Locator)))
+				return &toplevel_terrain_ptr[i];
+	}
+	return NULL;
 }
 
 void compress_chunk32(struct LoadedChunk *chunk, int16_t *packed_values_used, int16_t max_packed_values, struct PackedValues32 *result) {

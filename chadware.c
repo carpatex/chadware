@@ -15,6 +15,11 @@ size_t chunk_size;
 size_t entityg_size;
 size_t entity_size;
 
+size_t n_eventg_in;
+size_t n_eventg_out;
+size_t n_toplevel_terrain;
+size_t n_entityg;
+
 void *heap;
 void *v_eventg_in_ptr;
 void *v_eventg_out_ptr;
@@ -30,8 +35,8 @@ struct ToplevelTerrain* toplevel_terrain_ptr;
 struct EntityGeneric* entityg_ptr;
 // pointers to multiple sections of heap. A single pointer points to the only section of reserved memory.
 // This is done to avoid having to reserve more memory each time the game needs more. 
-int32_t curr_tick;
-int32_t curr_tick_epoch;
+uint32_t curr_tick;
+uint32_t curr_tick_epoch;
 size_t init_heap_chadware(const size_t intended_heap_size){
 	eventg_in_size = ((DATAIN_PROPORTION * intended_heap_size) / 100) + ((DATAIN_PROPORTION * intended_heap_size) % 100);
 	eventg_out_size = ((DATAOUT_PROPORTION * intended_heap_size) / 100) + ((DATAOUT_PROPORTION * intended_heap_size) % 100);
@@ -76,7 +81,15 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 	curr_tick_epoch = 0;
 	curr_tick = 0;
 
-	entityg_ptr = v_entityg_ptr;
+	eventg_in_ptr = (struct EventGeneric*) v_eventg_in_ptr;
+	n_eventg_in = eventg_in_size / sizeof(struct EventGeneric);
+	eventg_out_ptr = (struct EventGeneric*) v_eventg_out_ptr;
+	n_eventg_out = eventg_out_size / sizeof(struct EventGeneric);
+	toplevel_terrain_ptr = (struct ToplevelTerrain*) v_toplevel_terrain_ptr;
+	n_toplevel_terrain = toplevel_terrain_size / sizeof(struct ToplevelTerrain);
+	entityg_ptr = (struct EntityGeneric*) v_entityg_ptr;
+	n_entityg = entityg_size / sizeof(struct EntityGeneric);
+
 	int32_t i;
 	if (sizeof(struct EntityGeneric) * max(n_players, ENTITYGENERIC_PROPORTION) <= v_entity_ptr - v_chunk_ptr) {
 		// Check if there is enough space in the entity section to make the players.
@@ -94,12 +107,17 @@ int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_
 	int32_t i;
 	for (i = 0; i < n_event_in; i++) {
 		switch (event_in_list[i].event_id) {
-			case 0: // movement 
+			case 2: // movement 
 				handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
 			default:
 				fprintf(stderr, "Invalid event id %d.\n", event_in_list[i].event_id);
 		}
 	}
+	if(curr_tick == UINT32_MAX) {
+		curr_tick = 0;
+		curr_tick_epoch++;
+	}
+
 	return 0;
 }
 
