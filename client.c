@@ -4,6 +4,7 @@
 /* tomma chelbek, sigma */
 
 int main() {
+	char current_c;
 	WINDOW *info_win, *main_win;
 	int game = 1, size_x, old_size_x, size_y, old_size_y, ticks_elapsed = 0;
 	clock_t delta, oldtime = 0;
@@ -14,7 +15,7 @@ int main() {
 	noecho();
 	start_color();
 	keypad(stdscr, TRUE);
-	timeout(1);
+	timeout(2);
 	getmaxyx(stdscr, size_y, size_x);
 	info_win = newwin(size_y, INFO_WIDTH, 0, size_x - INFO_WIDTH);
 	main_win = newwin(size_y, size_x - INFO_WIDTH, 0, 0);
@@ -38,9 +39,15 @@ int main() {
 		mvwprintw(info_win, 1, 1, "SIZE_X: %d SIZE_Y: %d", getmaxx(stdscr), getmaxy(stdscr));
 		mvwprintw(info_win, 2, 1, "TPS: %.2lf", tps);
 		mvwprintw(info_win, 3, 1, "ELAPSED: %d", ticks_elapsed);
+		mvwprintw(info_win, 4, 1, "KEY: %c", current_c);
 		wrefresh(info_win);
 		wrefresh(main_win);
+		current_c = ' ';
 		switch(getch()){
+			case 'w':
+			case 'W':
+				current_c = 'w';
+				break;
 			case 'Q':
 			case 'q':
 				game = 0;

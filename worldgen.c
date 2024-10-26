@@ -1,4 +1,5 @@
 #include "chadware.h"
+
 float interpolate(float a0, float a1, float w) {
     /* // You may want clamping by inserting:
      * if (0.0 > w) return a0;
@@ -73,4 +74,6 @@ float perlin(float x, float y) {
     value = interpolate(ix0, ix1, sy);
     return value; // Will return in range -1 to 1. To make it in range 0 to 1, multiply by 0.5 and add 0.5
 }
+void gen_spawn_areas(int32_t n_players) {
 
+}

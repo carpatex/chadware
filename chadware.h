@@ -148,7 +148,7 @@ void compress_chunk16(struct LoadedChunk *, int16_t *, int16_t, struct PackedVal
 void decompress_chunk32(struct PackedValues32 *, int16_t, struct LoadedChunk *);
 void decompress_chunk16(struct PackedValues16 *, int16_t, struct LoadedChunk *);
 
-void gen_spawn_areas();
+void gen_spawn_areas(int32_t);
 void gen_chunk();
 
 int32_t tick(int32_t, struct EventGeneric*, int32_t *, struct EventGeneric*);

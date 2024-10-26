@@ -1,9 +1,9 @@
 CC := cc
 CFLAGS := -Wall -g
 INCLUDE := -I.
-OBJECTS_COMMON := chadware.o entity.o
+OBJECTS_COMMON := chadware.o entity.o world.o worldgen.o
 OBJECTS_CLIENT := $(OBJECTS_COMMON) client.o
-LIBS_CLIENT := -lncurses -ltinfo
+LIBS_CLIENT := -lncurses -ltinfo -lm
 
 all: client 
 
