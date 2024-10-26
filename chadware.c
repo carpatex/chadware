@@ -19,6 +19,7 @@ size_t n_eventg_in;
 size_t n_eventg_out;
 size_t n_toplevel_terrain;
 size_t n_entityg;
+size_t n_chunks;
 
 void *heap;
 void *v_eventg_in_ptr;
@@ -31,12 +32,14 @@ void *heapend_ptr;
 
 struct EventGeneric* eventg_in_ptr;
 struct EventGeneric* eventg_out_ptr;
+struct LoadedChunk* lchunk_ptr;
 struct ToplevelTerrain* toplevel_terrain_ptr;
 struct EntityGeneric* entityg_ptr;
 // pointers to multiple sections of heap. A single pointer points to the only section of reserved memory.
 // This is done to avoid having to reserve more memory each time the game needs more. 
 uint32_t curr_tick;
 uint32_t curr_tick_epoch;
+int32_t seed;
 size_t init_heap_chadware(const size_t intended_heap_size){
 	eventg_in_size = ((DATAIN_PROPORTION * intended_heap_size) / 100) + ((DATAIN_PROPORTION * intended_heap_size) % 100);
 	eventg_out_size = ((DATAOUT_PROPORTION * intended_heap_size) / 100) + ((DATAOUT_PROPORTION * intended_heap_size) % 100);
@@ -44,11 +47,15 @@ size_t init_heap_chadware(const size_t intended_heap_size){
 	entityg_size = ((ENTITYGENERIC_PROPORTION * intended_heap_size) / 100) + ((ENTITYGENERIC_PROPORTION * intended_heap_size) % 100);
 	entity_size = ((ENTITY_PROPORTION * intended_heap_size) / 100) + ((ENTITY_PROPORTION * intended_heap_size) % 100);
 
+
 	if (eventg_in_size % sizeof(struct EventGeneric)) { // adding enough bytes if division between proportions aren't exact.
 		eventg_in_size += sizeof(struct EventGeneric) - eventg_in_size % sizeof(struct EventGeneric);
 	}
 	if (eventg_out_size % sizeof(struct EventGeneric)) { // adding enough bytes if division between proportions aren't exact.
 		eventg_out_size += sizeof(struct EventGeneric) - eventg_out_size % sizeof(struct EventGeneric);
+	}
+	if(chunk_size % sizeof(struct LoadedChunk)) {
+		chunk_size += sizeof(struct LoadedChunk) - chunk_size % sizeof(struct LoadedChunk);
 	}
 	if (toplevel_terrain_size % sizeof(struct ToplevelTerrain)) { // adding enough bytes if division between proportions aren't exact.
 		toplevel_terrain_size += sizeof(struct ToplevelTerrain) - toplevel_terrain_size % sizeof(struct ToplevelTerrain);
@@ -80,11 +87,12 @@ size_t init_heap_chadware(const size_t intended_heap_size){
 int init_chadware(int32_t n_players, char* player_names[]) {
 	curr_tick_epoch = 0;
 	curr_tick = 0;
-
 	eventg_in_ptr = (struct EventGeneric*) v_eventg_in_ptr;
 	n_eventg_in = eventg_in_size / sizeof(struct EventGeneric);
 	eventg_out_ptr = (struct EventGeneric*) v_eventg_out_ptr;
 	n_eventg_out = eventg_out_size / sizeof(struct EventGeneric);
+	lchunk_ptr = (struct LoadedChunk *) v_chunk_ptr;
+	n_chunks = chunk_size / sizeof(struct LoadedChunk);
 	toplevel_terrain_ptr = (struct ToplevelTerrain*) v_toplevel_terrain_ptr;
 	n_toplevel_terrain = toplevel_terrain_size / sizeof(struct ToplevelTerrain);
 	entityg_ptr = (struct EntityGeneric*) v_entityg_ptr;
@@ -100,6 +108,9 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 		entityg_ptr[i].size = sizeof(struct EntityPlayer);
 		entityg_ptr[i].data = v_entity_ptr + i * sizeof(struct EntityPlayer);
 	}
+	srand(time(NULL) ^ clock());
+	seed = ~(rand() ^ (rand() ^ (rand() << 4)));
+	gen_spawn_areas(n_players);
 	// do world gen
 	return 0;
 }
@@ -121,10 +132,3 @@ int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_
 	return 0;
 }
 
-void debug_print_ptrs() {
-	printf("heapend_ptr %ld\n", *heapend_ptr);
-	printf("v_eventg_in_ptr %ld\n", *v_eventg_in_ptr);
-	printf("v_eventg_out_ptr %ld\n", *v_eventg_out_ptr);
-	printf("v_chunk_ptr %ld\n", *v_chunk_ptr);
-	printf("v_entity_ptr %ld\n", *v_entity_ptr);
-}

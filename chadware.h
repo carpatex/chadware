@@ -6,10 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 #define max(X, Y) ((X) > (Y) ? (X) : (Y))
 #define min(X, Y) ((X) < (Y) ? (X) : (Y))
 
+#define TPS_OBJECTIVE 32
+#define NEXT_TICK CLOCKS_PER_SEC / TPS_OBJECTIVE 
 #define PLAYER_NAME_SIZE 64
 #define CHUNK_N_TILES 16
 #define SUBMOTION_CONSTANT 16 
@@ -38,6 +41,7 @@ struct LoadedChunk {
 	int32_t tile[CHUNK_N_TILES][CHUNK_N_TILES];
 	int16_t extra_tile[CHUNK_N_TILES][CHUNK_N_TILES];
 	struct Locator location;
+	int8_t status;
 	int32_t start_pos_x;
 	int32_t start_pos_y;
 };
@@ -116,6 +120,7 @@ extern size_t entity_size;
 
 extern size_t n_eventg_in;
 extern size_t n_eventg_out;
+extern size_t n_chunks;
 extern size_t n_toplevel_terrain;
 extern size_t n_entityg;
 
@@ -130,9 +135,11 @@ extern void *heapend_ptr;
 
 extern struct EventGeneric* eventg_in_ptr;
 extern struct EventGeneric* eventg_out_ptr;
+extern struct LoadedChunk* lchunk_ptr;
 extern struct ToplevelTerrain* toplevel_terrain_ptr;
 extern struct EntityGeneric* entityg_ptr;
 
+extern int32_t seed;
 extern uint32_t curr_tick_epoch;
 extern uint32_t curr_tick;
 
@@ -141,9 +148,11 @@ void compress_chunk16(struct LoadedChunk *, int16_t *, int16_t, struct PackedVal
 void decompress_chunk32(struct PackedValues32 *, int16_t, struct LoadedChunk *);
 void decompress_chunk16(struct PackedValues16 *, int16_t, struct LoadedChunk *);
 
+void gen_spawn_areas();
+void gen_chunk();
+
 int32_t tick(int32_t, struct EventGeneric*, int32_t *, struct EventGeneric*);
 void handleMotionEvent(struct MotionEvent*);
 size_t init_heap_chadware(size_t);
-void debug_print_ptrs();
 
 #endif
