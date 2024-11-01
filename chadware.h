@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
+#include <tgmath.h>
 
 #define max(X, Y) ((X) > (Y) ? (X) : (Y))
 #define min(X, Y) ((X) < (Y) ? (X) : (Y))
@@ -139,7 +139,6 @@ extern struct LoadedChunk* lchunk_ptr;
 extern struct ToplevelTerrain* toplevel_terrain_ptr;
 extern struct EntityGeneric* entityg_ptr;
 
-extern int32_t seed;
 extern uint32_t curr_tick_epoch;
 extern uint32_t curr_tick;
 
@@ -149,7 +148,8 @@ void decompress_chunk32(struct PackedValues32 *, int16_t, struct LoadedChunk *);
 void decompress_chunk16(struct PackedValues16 *, int16_t, struct LoadedChunk *);
 
 void gen_spawn_areas(int32_t);
-void gen_chunk();
+void gen_chunk(int32_t, struct LoadedChunk *);
+int32_t perlinint32(int32_t, int32_t, uint32_t); 
 
 int32_t tick(int32_t, struct EventGeneric*, int32_t *, struct EventGeneric*);
 void handleMotionEvent(struct MotionEvent*);

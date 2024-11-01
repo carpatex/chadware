@@ -39,7 +39,6 @@ struct EntityGeneric* entityg_ptr;
 // This is done to avoid having to reserve more memory each time the game needs more. 
 uint32_t curr_tick;
 uint32_t curr_tick_epoch;
-int32_t seed;
 size_t init_heap_chadware(const size_t intended_heap_size){
 	eventg_in_size = ((DATAIN_PROPORTION * intended_heap_size) / 100) + ((DATAIN_PROPORTION * intended_heap_size) % 100);
 	eventg_out_size = ((DATAOUT_PROPORTION * intended_heap_size) / 100) + ((DATAOUT_PROPORTION * intended_heap_size) % 100);
@@ -109,8 +108,8 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 		entityg_ptr[i].data = v_entity_ptr + i * sizeof(struct EntityPlayer);
 	}
 	srand(time(NULL) ^ clock());
-	seed = ~(rand() ^ (rand() ^ (rand() << 4)));
-	gen_spawn_areas(n_players);
+	//seed = ~(rand() ^ (rand() ^ (rand() << 4)));
+	//gen_spawn_areas(n_players);
 	// do world gen
 	return 0;
 }
