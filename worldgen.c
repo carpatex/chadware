@@ -64,9 +64,16 @@ float perlin(uint32_t full_seed, float x, float y, float freq, int32_t depth)
     return fin/div;
 }
 int32_t perlinint32(int32_t x, int32_t y, uint32_t full_seed) {
-	float f_result = perlin(full_seed, x + 0.2, y - 0.2, 0.1, 2) * 256;
+	float f_result = perlin(full_seed, x + 0.2, y - 0.2, 0.1, 2) * 1000;
 	return (int32_t) f_result;
 }
+int32_t get_block_temp(struct Locator lc, int32_t seed, int32_t x, int32_t y) {
+	uint32_t full_seed = seed ^ (lc.surface ^ (lc.orbit ^ (lc.planetary_system  ^ (lc.galaxy))));
+	return perlinint32(x, y, full_seed) / 10;
+}
+void gen_protochunk_earth(struct LoadedChunk * lc, int32_t seed){
+}
+
 void gen_spawn_areas(int32_t n_players) {
 
 }

@@ -65,6 +65,11 @@ struct EntityIdentifier { // There can't be two identic instances of this in the
 	size_t entity_name_size;
 	char* entity_name;
 };
+struct NPC {
+	int8_t iq;
+	int32_t civ;
+	int16_t role;
+};
 struct EntityPositionSurface {
 	int32_t pos_x;
 	int8_t motion_pos_x;
