@@ -13,6 +13,7 @@ CompileFlags:
   Add: [-std=c99]
 
 If: PathMatch: .*\.h
+
 CompileFlags:
 	Add: [-std=c99]
 	Add: [-xc-header]
