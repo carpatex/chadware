@@ -64,7 +64,7 @@ float perlin(uint32_t full_seed, float x, float y, float freq, int32_t depth)
 	return fin/div;
 }
 int32_t perlinint32(int32_t x, int32_t y, uint32_t full_seed) {
-	float f_result = perlin(full_seed, x + 0.2, y - 0.2, 0.1, 2) * 1000000;
+	float f_result = perlin(full_seed, x + 0.1, y - 0.1, 0.0069420, 9) * 1000000;
 	return (int32_t) f_result;
 }
 int32_t get_earth_humidity(struct Locator lc, int32_t seed, int32_t x, int32_t y) {
@@ -73,7 +73,7 @@ int32_t get_earth_humidity(struct Locator lc, int32_t seed, int32_t x, int32_t y
 }
 int32_t get_earth_temp(struct Locator lc, int32_t seed, int32_t x, int32_t y) {
 	uint32_t full_seed = seed ^ (lc.surface ^ (lc.orbit ^ (lc.planetary_system  ^ (lc.galaxy))));
-	return perlinint32(x, y, full_seed) / 33333; // one million divided by 33333 is approximately 60, so 60 is the temperature variability of earth. 10 is 0°C. 60 is 50°. 0 is -10° 
+	return perlinint32(x, y, ~full_seed) / 33333; // one million divided by 33333 is approximately 60, so 60 is the temperature variability of earth. 10 is 0°C. 60 is 50°. 0 is -10° 
 }
 
 
@@ -83,21 +83,27 @@ void gen_chunk_earth_surface(int32_t seed, struct LoadedChunk* chunk) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
 			curr_tile_temp = get_earth_temp(chunk->location, seed, chunk->start_pos_x + j, chunk->start_pos_y + i);
 			curr_tile_humidity = get_earth_humidity(chunk->location, seed, chunk->start_pos_y + j + 1, chunk->start_pos_x + i - 1);
-			curr_height = perlinint32(chunk->start_pos_x + j, chunk->start_pos_y + i, seed) / 33333;
-			if ((curr_tile_humidity > 10 || curr_height < 10) && curr_tile_temp > 5) { // generate water
-				chunk->tile[j][i] = 60; // generate water
+			curr_height = perlinint32(chunk->start_pos_x + j, chunk->start_pos_y + i, seed) / 41666; // 24 possible layers, the first 8 are undeground
+			if ((curr_tile_humidity > 16 && curr_height < 8) && curr_tile_temp > 5) { // generate water
+				chunk->tile[j][i] = 48; // generate water
 			}
-			else if (curr_height <= 10 && (curr_tile_humidity < 10 || curr_tile_temp <= 5)) {
-				chunk->tile[j][i] = 91; // generate ice on top of sea / river
+			else if (curr_height <= 8 && curr_tile_temp <= 9) {
+				chunk->tile[j][i] = 73; // generate ice on top of sea / river
 			}
-			else if (curr_height >= 10 && curr_height < 20 && curr_tile_humidity > 15 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 1 + curr_height - 10; // generate grass
+			else if (curr_height > 8 && curr_height < 16 && curr_tile_temp <= 9) {
+				chunk->tile[j][i] = 81 + curr_height - 8; // generate snow on a dry or cold enough place
 			}
-			else if (curr_height >= 10 && curr_height < 20 && curr_tile_humidity < 15 && curr_tile_humidity > 10 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 11 + curr_height - 10; // generate dirt, drier than grass
+			else if (curr_height >= 8 && curr_height < 20 && curr_tile_humidity > 15 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 1 + curr_height - 8; // generate grass
 			}
-			else if (curr_height >= 10 && curr_height < 20 && curr_tile_humidity < 10 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 31 + curr_height - 10; // generate sand, drier than dirt
+			else if (curr_height >= 8 && curr_height < 20 && curr_tile_humidity < 15 && curr_tile_humidity > 10 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 9 + curr_height - 8; // generate dirt, drier than grass
+			}
+			else if (curr_height >= 8 && curr_height < 20 && curr_tile_humidity < 10 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 25 + curr_height - 8; // generate sand, drier than dirt
+			}
+			else if (curr_height >= 16 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 17 + curr_height - 16; // generate stone on mountains (height higher or equal to 20) 
 			}
 		}
 	}
