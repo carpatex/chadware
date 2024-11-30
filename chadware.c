@@ -39,6 +39,7 @@ struct EntityGeneric* entityg_ptr;
 // This is done to avoid having to reserve more memory each time the game needs more. 
 uint32_t curr_tick;
 uint32_t curr_tick_epoch;
+
 size_t init_heap_chadware(const size_t intended_heap_size){
 	eventg_in_size = ((DATAIN_PROPORTION * intended_heap_size) / 100) + ((DATAIN_PROPORTION * intended_heap_size) % 100);
 	eventg_out_size = ((DATAOUT_PROPORTION * intended_heap_size) / 100) + ((DATAOUT_PROPORTION * intended_heap_size) % 100);

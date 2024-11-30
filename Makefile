@@ -3,7 +3,7 @@ CFLAGS := -Wall -g
 INCLUDE := -I.
 OBJECTS_COMMON := chadware.o entity.o world.o worldgen.o
 OBJECTS_T_CHUNK := $(OBJECTS_COMMON) test_chunk.o
-OBJECTS_CLIENT := $(OBJECTS_COMMON) client.o
+OBJECTS_CLIENT := $(OBJECTS_COMMON) client.o chadgraphics.o
 LIBS_CLIENT := -lncurses -ltinfo -lm
 
 all: client 

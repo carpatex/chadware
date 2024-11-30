@@ -83,73 +83,73 @@ void gen_chunk_earth_surface(int32_t seed, struct LoadedChunk* chunk) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
 			curr_tile_temp = get_earth_temp(chunk->location, seed, chunk->start_pos_x + j, chunk->start_pos_y + i);
 			curr_tile_humidity = get_earth_humidity(chunk->location, seed, chunk->start_pos_y + j + 1, chunk->start_pos_x + i - 1);
-			curr_height = perlinint32(chunk->start_pos_x + j, chunk->start_pos_y + i, seed) / 41666; // 24 possible layers, the first 8 are undeground
-			if ((curr_tile_humidity > 16 && curr_height < 8) && curr_tile_temp > 5) { // generate water
-				chunk->tile[j][i] = 48; // generate water
+			curr_height = perlinint32(chunk->start_pos_x + j, chunk->start_pos_y + i, seed) / 62500; // 24 possible layers, the first 8 are undeground
+			if ((curr_tile_humidity > 16 && curr_height < 5) && curr_tile_temp > 5) { // generate water
+				chunk->tile[j][i] = 86; // generate water5
 			}
-			else if (curr_height <= 8 && curr_tile_temp <= 9) {
-				chunk->tile[j][i] = 73; // generate ice on top of sea / river
+			else if (curr_height <= 5 && curr_tile_temp <= 9) {
+				chunk->tile[j][i] = 150; // generate ice5 on top of sea / river
 			}
-			else if (curr_height > 8 && curr_height < 16 && curr_tile_temp <= 9) {
-				chunk->tile[j][i] = 81 + curr_height - 8; // generate snow on a dry or cold enough place
+			else if (curr_height >= 5 && curr_height < 11 && curr_tile_temp <= 9) {
+				chunk->tile[j][i] = 166 + curr_height - 5; // generate snow5 on a dry or cold enough place
 			}
-			else if (curr_height >= 8 && curr_height < 20 && curr_tile_humidity > 15 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 1 + curr_height - 8; // generate grass
+			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity > 15 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 6 + curr_height - 5; // generate grass5
 			}
-			else if (curr_height >= 8 && curr_height < 20 && curr_tile_humidity < 15 && curr_tile_humidity > 10 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 9 + curr_height - 8; // generate dirt, drier than grass
+			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity < 15 && curr_tile_humidity > 10 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 22 + curr_height - 5; // generate dirt5, drier than grass
 			}
-			else if (curr_height >= 8 && curr_height < 20 && curr_tile_humidity < 10 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 25 + curr_height - 8; // generate sand, drier than dirt
+			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity < 10 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 54 + curr_height - 5; // generate sand5, drier than dirt
 			}
-			else if (curr_height >= 16 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 17 + curr_height - 16; // generate stone on mountains (height higher or equal to 20) 
+			else if (curr_height >= 11 && curr_tile_temp > 11) {
+				chunk->tile[j][i] = 43 + curr_height - 11; // generate stone11 on mountains (height higher or equal to 20) 
 			}
 		}
 	}
 }
 
-	void gen_chunk_earth_orbit(int32_t seed, struct LoadedChunk* chunk) {
-		switch (chunk->location.surface) {
-			case 0:
-				gen_chunk_earth_surface(seed, chunk);
-				break;
-			case 64:
-				// gen_chunk_e_moon_surface(seed, chunk);
-				break;
-		}
+void gen_chunk_earth_orbit(int32_t seed, struct LoadedChunk* chunk) {
+	switch (chunk->location.surface) {
+		case 0:
+			gen_chunk_earth_surface(seed, chunk);
+			break;
+		case 64:
+			// gen_chunk_e_moon_surface(seed, chunk);
+			break;
 	}
-	void gen_chunk_universe(int32_t seed, struct LoadedChunk* chunk){
-		if (!chunk->location.galaxy) {
-			// gen_chunk_void_universe(seed, chunk);
-		}
-		else if (chunk->location.galaxy && !chunk->location.planetary_system && !chunk->location.orbit && !chunk->location.surface && !chunk->location.subsurface) {
-			// gen_chunk_galaxy(seed, chunk);
-		}
-		else if(chunk->location.galaxy && chunk->location.planetary_system && !chunk->location.orbit && !chunk->location.surface && !chunk->location.subsurface) {
-			// gen_chunk_planetary_system(seed, chunk);
-		}
-		else if(chunk->location.galaxy && chunk->location.planetary_system && chunk->location.orbit == 4) {
-			// the four orbit is earth, upper if statements are pickier because they exclude vehicles for the sake of only giving the corresponding space background
-			gen_chunk_earth_orbit(seed, chunk);
-		} 
+}
+void gen_chunk_universe(int32_t seed, struct LoadedChunk* chunk){
+	if (!chunk->location.galaxy) {
+		// gen_chunk_void_universe(seed, chunk);
 	}
-
-	void gen_chunk(int32_t seed, struct LoadedChunk* chunk) {
-
-		switch(chunk->location.dimension) {
-			case 0:
-				gen_chunk_universe(seed, chunk);
-				break;
-			case 1:
-				// gen_chunk_heaven(seed, chunk);
-				break;
-			case -1:
-				// gen_chunk_hell(seed, chunk);
-				break;
-		}
+	else if (chunk->location.galaxy && !chunk->location.planetary_system && !chunk->location.orbit && !chunk->location.surface && !chunk->location.subsurface) {
+		// gen_chunk_galaxy(seed, chunk);
 	}
-
-	void gen_spawn_areas(int32_t n_players) {
-
+	else if(chunk->location.galaxy && chunk->location.planetary_system && !chunk->location.orbit && !chunk->location.surface && !chunk->location.subsurface) {
+		// gen_chunk_planetary_system(seed, chunk);
 	}
+	else if(chunk->location.galaxy && chunk->location.planetary_system && chunk->location.orbit == 4) {
+		// the four orbit is earth, upper if statements are pickier because they exclude vehicles for the sake of only giving the corresponding space background
+		gen_chunk_earth_orbit(seed, chunk);
+	} 
+}
+
+void gen_chunk(int32_t seed, struct LoadedChunk* chunk) {
+
+	switch(chunk->location.dimension) {
+		case 0:
+			gen_chunk_universe(seed, chunk);
+			break;
+		case 1:
+			// gen_chunk_heaven(seed, chunk);
+			break;
+		case -1:
+			// gen_chunk_hell(seed, chunk);
+			break;
+	}
+}
+
+void gen_spawn_areas(int32_t n_players) {
+
+}

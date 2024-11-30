@@ -2,10 +2,10 @@
 #include <ncurses.h>
 #define INFO_WIDTH 25
 /* tomma chelbek, sigma */
-
+WINDOW *info_win, *main_win;
+void print_grass(int8_t, int, int, int);
 int main() {
 	char current_c;
-	WINDOW *info_win, *main_win;
 	int game = 1, size_x, old_size_x, size_y, old_size_y, ticks_elapsed = 0;
 	clock_t delta, oldtime = 0;
 	double tps;
@@ -23,7 +23,7 @@ int main() {
 		delta = clock() - oldtime;
 		tps = (1.0 / delta) * CLOCKS_PER_SEC;
 		oldtime = clock();
-		
+
 		old_size_x = size_x;
 		old_size_y = size_y;
 		getmaxyx(stdscr, size_y, size_x);
@@ -41,6 +41,7 @@ int main() {
 		mvwprintw(info_win, 3, 1, "ELAPSED: %d", ticks_elapsed);
 		mvwprintw(info_win, 4, 1, "KEY: %c", current_c);
 		wrefresh(info_win);
+		print_grass(ticks_elapsed % 96, 1, 1, 10);
 		wrefresh(main_win);
 		current_c = ' ';
 		switch(getch()){
