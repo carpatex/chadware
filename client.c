@@ -13,7 +13,7 @@ char **players;
 struct EventGeneric *events_in;
 struct EventGeneric *events_out;
 int32_t pos_x, pos_y, hp;
-void draw_game_content(int, int, int, int);
+void draw_game_content();
 int main() {
 	size_t i;
 	char current_c;
@@ -91,7 +91,7 @@ int main() {
 		getmaxyx(main_win, max_game_y, max_game_x);
 		getbegyx(main_win, beg_game_y, beg_game_x);
 
-		draw_game_content(beg_game_x, beg_game_y, max_game_x, max_game_y);
+		draw_game_content();
 		//print_grass(ticks_elapsed % 96, 1, 1, 10);
 
 		wrefresh(main_win);
