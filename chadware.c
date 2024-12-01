@@ -118,6 +118,9 @@ int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_
 	int32_t i;
 	for (i = 0; i < n_event_in; i++) {
 		switch (event_in_list[i].event_id) {
+			case -1:
+				free(heap);
+				return 1;
 			case 2: // movement 
 				handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
 			default:

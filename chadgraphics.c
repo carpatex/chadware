@@ -58,7 +58,7 @@ char i14toh(int32_t n, int32_t start_point) {
 void print_grass(int8_t n_anim, int x, int y, int level) {
 	init_pair(1, COLOR_WHITE, COLOR_GREEN);
 	wattr_set(main_win, A_BOLD, 1, NULL);
-	if (n_anim > 48) {
+	if (n_anim > 50) {
 		mvwaddch(main_win, y, x, i14toh(1 + level, 1));
 	}
 	else { 

@@ -159,5 +159,6 @@ int32_t perlinint32(int32_t, int32_t, uint32_t);
 int32_t tick(int32_t, struct EventGeneric*, int32_t *, struct EventGeneric*);
 void handleMotionEvent(struct MotionEvent*);
 size_t init_heap_chadware(size_t);
+int init_chadware(int32_t, char*[]); 
 
 #endif
