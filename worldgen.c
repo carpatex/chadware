@@ -91,19 +91,19 @@ void gen_chunk_earth_surface(int32_t seed, struct LoadedChunk* chunk) {
 				chunk->tile[j][i] = 150; // generate ice5 on top of sea / river
 			}
 			else if (curr_height >= 5 && curr_height < 11 && curr_tile_temp <= 9) {
-				chunk->tile[j][i] = 166 + curr_height - 5; // generate snow5 on a dry or cold enough place
+				chunk->tile[j][i] = 166 + curr_height - 5; // generate snow5 or higher on a dry or cold enough place
 			}
 			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity > 15 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 6 + curr_height - 5; // generate grass5
+				chunk->tile[j][i] = 6 + curr_height - 5; // generate grass5 or higher on most conditions
 			}
 			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity < 15 && curr_tile_humidity > 10 && curr_tile_temp > 10) {
 				chunk->tile[j][i] = 22 + curr_height - 5; // generate dirt5, drier than grass
 			}
 			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity < 10 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 54 + curr_height - 5; // generate sand5, drier than dirt
+				chunk->tile[j][i] = 54 + curr_height - 5; // generate sand5 or higher, drier than dirt
 			}
 			else if (curr_height >= 11 && curr_tile_temp > 11) {
-				chunk->tile[j][i] = 43 + curr_height - 11; // generate stone11 on mountains (height higher or equal to 20) 
+				chunk->tile[j][i] = 43 + curr_height - 11; // generate stone11 or higher on mountains (height higher or equal to 20) 
 			}
 		}
 	}
