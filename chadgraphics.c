@@ -1,4 +1,5 @@
 #include "chadware.h"
+#include <ncurses.h>
 #include "chadgraphics.h"
 
 char i14toh(int32_t n, int32_t start_point) {
@@ -43,6 +44,7 @@ char i14toh(int32_t n, int32_t start_point) {
 			break;
 		case 12:
 			return 'c';
+			break;
 		case 13:
 			return 'd';
 			break;
@@ -55,14 +57,71 @@ char i14toh(int32_t n, int32_t start_point) {
 	}
 }
 
-void print_grass(int8_t n_anim, int x, int y, int level) {
-	init_pair(1, COLOR_WHITE, COLOR_GREEN);
-	wattr_set(main_win, A_BOLD, 1, NULL);
-	if (n_anim > 50) {
-		mvwaddch(main_win, y, x, i14toh(1 + level, 1));
+void p_natural_block(int32_t tile_id, int8_t n_anim, int x, int y, int level) {
+	char block_character;
+	
+
+	if (tile_id >= 1 && tile_id <= 16) { // grass
+		init_pair(1, COLOR_WHITE, COLOR_GREEN);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '~';
 	}
-	else { 
-		mvwaddch(main_win, y, x, '~');
+	if (tile_id >= 17 && tile_id <= 32) { // dirt
+		init_pair(1, COLOR_BLACK, COLOR_WHITE);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '+';
+	}
+	if (tile_id >= 33 && tile_id <= 48) { // stone
+		init_pair(1, COLOR_WHITE, COLOR_BLACK);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '@';
+	}
+	if (tile_id >= 49 && tile_id <= 64) { // sand
+		init_pair(1, COLOR_WHITE, COLOR_YELLOW);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '#';
+	}
+	if (tile_id >= 65 && tile_id <= 80) { // sandstone
+		init_pair(1, COLOR_BLACK, 11 /* LIGHT_YELLOW */);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '[';
+	}
+	if (tile_id >= 81 && tile_id <= 96) { // water 
+		init_pair(1, COLOR_WHITE, COLOR_BLUE);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '=';
+	}
+	if (tile_id >= 97 && tile_id <= 112) { // lava 
+		init_pair(1, COLOR_WHITE, 9 /*LIGHT_RED*/);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '=';
+	}
+	if (tile_id >= 113 && tile_id <= 128) { // clay
+		init_pair(1, COLOR_WHITE, 8 /*LIGHT_BLACK or GRAY*/);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '0';
+	}
+	if (tile_id >= 129 && tile_id <= 144) { // gravel
+		init_pair(1, COLOR_BLACK, 8 /*LIGHT_BLACK or GRAY*/);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '&';
+	} 
+	if (tile_id >= 145 && tile_id <= 160) { // ice
+		init_pair(1, 8 /*LIGHT_BLACK or GRAY*/, 12 /*LIGHT_BLUE*/);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '$';
+	}
+	if (tile_id >= 161 && tile_id <= 176) { // snow
+		init_pair(1, 8 /*LIGHT_BLACK or GRAY*/, COLOR_WHITE);
+		wattr_set(main_win, A_BOLD, 1, NULL);
+		block_character = '@';
+	}
+
+	if (n_anim > 50) {
+	mvwaddch(main_win, y, x, i14toh(tile_id + level, 1));
+	}
+	else {
+		mvwaddch(main_win, y, x, block_character);
 	}
 	wattr_set(main_win, A_NORMAL, 0, NULL);
 }
