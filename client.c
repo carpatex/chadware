@@ -1,11 +1,9 @@
 #include "chadware.h"
-#include <ncurses.h>
-#include <stdio.h>
+#include "chadgraphics.h"
 #define GAME_MEM 1024*128
 #define N_PLAYERS 1
 #define INFO_WIDTH 25
 /* tomma chelbek, sigma */
-size_t k;
 WINDOW *info_win, *main_win;
 int max_game_x, max_game_y, beg_game_x, beg_game_y;
 int32_t n_events_input;
@@ -49,6 +47,10 @@ int main() {
 		}
 	}
 
+
+	srand(clock() ^ ~(time(NULL)));
+	seed = rand();
+
 	strncpy(players[0], "carpatex", 64);
 	if(init_chadware(1, players)) { // checks for errors during game init
 		fputs("Unknown error initializating the game.\n", stderr);
@@ -59,6 +61,8 @@ int main() {
 	pj_generic->location.planetary_system = 1;
 	pj_generic->location.orbit = 4;
 	pj_generic->location.surface = 0;
+	pj_generic->pos.pos_x = 0;
+	pj_generic->pos.pos_y = 0;
 	initscr();
 	raw();
 	noecho();
@@ -68,6 +72,7 @@ int main() {
 	getmaxyx(stdscr, size_y, size_x);
 	info_win = newwin(size_y, INFO_WIDTH, 0, size_x - INFO_WIDTH);
 	main_win = newwin(size_y, size_x - INFO_WIDTH, 0, 0);
+	init_char_colors();
 	while(game) {
 		delta = clock() - oldtime;
 		tps = (1.0 / delta) * CLOCKS_PER_SEC;
@@ -100,9 +105,10 @@ int main() {
 		getmaxyx(main_win, max_game_y, max_game_x);
 		getbegyx(main_win, beg_game_y, beg_game_x);
 
-		draw_game_content();
+		draw_game_content(ticks_elapsed);
 		//print_grass(ticks_elapsed % 96, 1, 1, 10);
-
+		pj_generic->pos.pos_x++;
+	//	reset_color_pairs();
 		wrefresh(main_win);
 		current_c = ' ';
 		switch(getch()){
@@ -125,37 +131,56 @@ gracefully_exit:
 	return 0;
 }
 
-void draw_game_content() {
-	size_t i, j;
+void draw_game_content(int current_tick) {
+	uint8_t exact_chunk_x, exact_chunk_y;
+	size_t i, j, k, l;
 	size_t max_chunk_x, max_chunk_y;
-	int lower_limit_x, lower_limit_y, upper_limit_x, upper_limit_y;
+	int32_t lower_limit_x, lower_limit_y;
 	--max_game_x;
 	--max_game_y;
 	++beg_game_x;
 	++beg_game_y;
 	// the limits of the screen have to have a 1 character margin on each side as otherwise it would replace the box.
 	// anyways, this is to have a structure, some variables are not going to be used.
-	lower_limit_x = max_game_x % 16;
-	lower_limit_y = max_game_y % 16;
-	upper_limit_x = 0 - beg_game_x % 16;
-	upper_limit_y = 0 - beg_game_x % 16;
 	max_chunk_x = max_game_x / 16;
-	if(max_game_x % 16)
+	if(max_game_x % 16) {
+		lower_limit_x = max_game_x % 16;
 		max_chunk_x++;
+	}
+	else 
+		exact_chunk_x = 1;
 	max_chunk_y = max_game_y / 16;
-	if(max_game_y % 16)
+	if(max_game_y % 16) {
 		max_chunk_y++;
+		lower_limit_y = max_game_y % 16;
+	}
+	else 
+		exact_chunk_y = 1;
 
 	k = 0;
 	for (i = 0; i < max_chunk_y; i++) {
 		for(j = 0; j < max_chunk_x; j++) {
+			lchunk_ptr[k].start_pos_x = (pj_generic->pos.pos_x / 16) + j;
+			lchunk_ptr[k].start_pos_y = (pj_generic->pos.pos_y / 16) + i;
 			lchunk_ptr[k].location = pj_generic->location;
+			gen_chunk(seed, &lchunk_ptr[k]);
 			k++;
 		}
 	}
+	if(!exact_chunk_x)
+		k = lower_limit_x;
+	if(!exact_chunk_y)
+		l = lower_limit_y;
 	for(i = 0; i < max_game_y; i++) {
+		if (l / 16)
+			l = 0;
 		for(j = 0; j < max_game_x; j++) {
-			
+			if (k / 16) // reset the counter every time it hits 16 blocks
+				k = 0;
+			p_natural_block(lchunk_ptr[(k % 16) + ((l % 16) * max_chunk_x)].tile[l][k], current_tick % 16, j, i);
+			k++;
 		}
+		l++;
 	}
+	wrefresh(main_win);
 }

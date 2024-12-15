@@ -146,6 +146,7 @@ extern struct EntityGeneric* entityg_ptr;
 
 extern uint32_t curr_tick_epoch;
 extern uint32_t curr_tick;
+extern int32_t seed;
 
 void compress_chunk32(struct LoadedChunk *, int16_t *, int16_t, struct PackedValues32 *);
 void compress_chunk16(struct LoadedChunk *, int16_t *, int16_t, struct PackedValues16 *);
