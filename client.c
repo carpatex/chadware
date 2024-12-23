@@ -13,7 +13,6 @@ struct EventGeneric *events_in;
 struct EntityGeneric *pj_generic;
 struct EntityPlayer *pj;
 struct EventGeneric *events_out;
-int32_t pos_x, pos_y, hp;
 void draw_game_content();
 int main() {
 	size_t i;
@@ -56,7 +55,7 @@ int main() {
 		fputs("Unknown error initializating the game.\n", stderr);
 	}
 	pj_generic = &entityg_ptr[0];
-	pj = entityg_ptr->data;
+	pj = entityg_ptr[0].data;
 	pj_generic->location.galaxy = 1;
 	pj_generic->location.planetary_system = 1;
 	pj_generic->location.orbit = 4;
@@ -95,8 +94,8 @@ int main() {
 		mvwprintw(info_win, 2, 1, "TPS: %.2lf", tps);
 		mvwprintw(info_win, 3, 1, "ELAPSED: %d", ticks_elapsed);
 		mvwprintw(info_win, 4, 1, "KEY: %c", current_c);
-		mvwprintw(info_win, 5, 1, "HP: %d", hp);
-		mvwprintw(info_win, 6, 1, "POS X: %d", pos_x);
+		mvwprintw(info_win, 5, 1, "HP: %d", pj->hp);
+		mvwprintw(info_win, 6, 1, "POS X: %d", pj_generic->pos.pos_x);
 		wrefresh(info_win);
 		// DRAW EVERYTHING RELATED TO THE GAME'S WORLD HERE
 		if (tick(n_events_input, events_in, &n_events_output, events_out) == -1) {
@@ -169,8 +168,12 @@ void draw_game_content(int current_tick) {
 	}
 	if(!exact_chunk_x)
 		k = lower_limit_x;
+	else
+	 k = 0;
 	if(!exact_chunk_y)
 		l = lower_limit_y;
+	else
+	 l = 0;
 	for(i = 0; i < max_game_y; i++) {
 		if (l / 16)
 			l = 0;
@@ -182,5 +185,4 @@ void draw_game_content(int current_tick) {
 		}
 		l++;
 	}
-	wrefresh(main_win);
 }
