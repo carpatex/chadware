@@ -8,8 +8,8 @@
 #include <time.h>
 #include <tgmath.h>
 
-#define max(X, Y) ((X) > (Y) ? (X) : (Y))
-#define min(X, Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
+#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
 
 #define TPS_OBJECTIVE 32
 #define NEXT_TICK CLOCKS_PER_SEC / TPS_OBJECTIVE 

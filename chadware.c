@@ -100,10 +100,6 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 	n_entityg = entityg_size / sizeof(struct EntityGeneric);
 
 	int32_t i;
-	if (sizeof(struct EntityGeneric) * max(n_players, ENTITYGENERIC_PROPORTION) <= v_entity_ptr - v_chunk_ptr) {
-		// Check if there is enough space in the entity section to make the players.
-		return 1;
-	}
 	for (i = 0; i < n_players; i++) {
 		entityg_ptr[i].identifier.type = 0; // sets the entity type to 0 for EntityPlayer
 		entityg_ptr[i].size = sizeof(struct EntityPlayer);
