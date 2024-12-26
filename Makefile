@@ -12,7 +12,7 @@ all: client
 	$(CC) $(INCLUDE) $(CFLAGS) -c $(input) -o $(output)
 
 client: $(OBJECTS_CLIENT) 
-	$(CC) $(OBJECTS_CLIENT) -o chadware $(LIBS_CLIENT)
+	$(CC) $(OBJECTS_CLIENT) -o chadware -fsanitize=address $(LIBS_CLIENT)
 
 test_chunk: $(OBJECTS_T_CHUNK) 
 	$(CC) $(OBJECTS_T_CHUNK) -o test_chunk 

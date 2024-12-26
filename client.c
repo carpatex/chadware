@@ -23,11 +23,13 @@ int main() {
 	double tps;
 	// allocate events buffer memory. this buffer is the one used to communicate the game loop with the client/server
 	// it is not the same as the one used internally by the game
-	if(!(events_in = calloc(32, sizeof(struct EventGeneric)))) {
+	events_in = calloc(32, sizeof(struct EventGeneric));
+	if(!events_in) {
 		perror("Failed to allocate memory.");
 		return 1;
 	}
-	if(!(events_out = calloc(32, sizeof(struct EventGeneric)))) {
+	events_out = calloc(32, sizeof(struct EventGeneric));
+	if(!events_out) {
 		perror("Failed to allocate memory.");
 		return 1;
 	}
@@ -36,12 +38,14 @@ int main() {
 		perror("Failed to allocate memory.");
 		return 1;
 	}
-	if(!(players = calloc(1, sizeof(char*)))) {
+	players = calloc(1, sizeof(char*));
+	if(!players) {
 		perror("Failed to allocate memory.");
 		return 1;
 	}
 	for (i = 0; i < N_PLAYERS; i++){
-		if(!(players[i] = calloc(64, sizeof(char)))) {
+		players[i] = calloc(64, sizeof(char));
+		if(!players[i]) {
 			perror("Failed to allocate memory.");
 			return 1;
 		}
