@@ -123,5 +123,4 @@ void p_natural_block(int32_t tile_id, int8_t n_anim, int x, int y) {
 	else {
 		mvwaddch(main_win, y, x, block_character);
 	}
-	wattr_set(main_win, A_NORMAL, 0, NULL);
 }

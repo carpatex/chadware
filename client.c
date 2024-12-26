@@ -13,7 +13,8 @@ struct EventGeneric *events_in;
 struct EntityGeneric *pj_generic;
 struct EntityPlayer *pj;
 struct EventGeneric *events_out;
-void draw_game_content();
+int32_t pos_x, pos_y, hp;
+void draw_game_content(int);
 int main() {
 	size_t i;
 	char current_c;
@@ -55,7 +56,7 @@ int main() {
 		fputs("Unknown error initializating the game.\n", stderr);
 	}
 	pj_generic = &entityg_ptr[0];
-	pj = entityg_ptr[0].data;
+	pj = entityg_ptr->data;
 	pj_generic->location.galaxy = 1;
 	pj_generic->location.planetary_system = 1;
 	pj_generic->location.orbit = 4;
@@ -94,7 +95,7 @@ int main() {
 		mvwprintw(info_win, 2, 1, "TPS: %.2lf", tps);
 		mvwprintw(info_win, 3, 1, "ELAPSED: %d", ticks_elapsed);
 		mvwprintw(info_win, 4, 1, "KEY: %c", current_c);
-		mvwprintw(info_win, 5, 1, "HP: %d", pj->hp);
+		mvwprintw(info_win, 5, 1, "HP: %d", hp);
 		mvwprintw(info_win, 6, 1, "POS X: %d", pj_generic->pos.pos_x);
 		wrefresh(info_win);
 		// DRAW EVERYTHING RELATED TO THE GAME'S WORLD HERE
@@ -106,7 +107,6 @@ int main() {
 
 		draw_game_content(ticks_elapsed);
 		//print_grass(ticks_elapsed % 96, 1, 1, 10);
-		pj_generic->pos.pos_x++;
 	//	reset_color_pairs();
 		wrefresh(main_win);
 		current_c = ' ';
@@ -122,6 +122,7 @@ int main() {
 		}
 		while(clock() < oldtime + NEXT_TICK);
 		ticks_elapsed++;
+		pj_generic->pos.pos_x += 1;
 	}
 gracefully_exit:
 	endwin();
@@ -131,58 +132,6 @@ gracefully_exit:
 }
 
 void draw_game_content(int current_tick) {
-	uint8_t exact_chunk_x, exact_chunk_y;
 	size_t i, j, k, l;
-	size_t max_chunk_x, max_chunk_y;
-	int32_t lower_limit_x, lower_limit_y;
-	--max_game_x;
-	--max_game_y;
-	++beg_game_x;
-	++beg_game_y;
-	// the limits of the screen have to have a 1 character margin on each side as otherwise it would replace the box.
-	// anyways, this is to have a structure, some variables are not going to be used.
-	max_chunk_x = max_game_x / 16;
-	if(max_game_x % 16) {
-		lower_limit_x = max_game_x % 16;
-		max_chunk_x++;
-	}
-	else 
-		exact_chunk_x = 1;
-	max_chunk_y = max_game_y / 16;
-	if(max_game_y % 16) {
-		max_chunk_y++;
-		lower_limit_y = max_game_y % 16;
-	}
-	else 
-		exact_chunk_y = 1;
-
-	k = 0;
-	for (i = 0; i < max_chunk_y; i++) {
-		for(j = 0; j < max_chunk_x; j++) {
-			lchunk_ptr[k].start_pos_x = (pj_generic->pos.pos_x / 16) + j;
-			lchunk_ptr[k].start_pos_y = (pj_generic->pos.pos_y / 16) + i;
-			lchunk_ptr[k].location = pj_generic->location;
-			gen_chunk(seed, &lchunk_ptr[k]);
-			k++;
-		}
-	}
-	if(!exact_chunk_x)
-		k = lower_limit_x;
-	else
-	 k = 0;
-	if(!exact_chunk_y)
-		l = lower_limit_y;
-	else
-	 l = 0;
-	for(i = 0; i < max_game_y; i++) {
-		if (l / 16)
-			l = 0;
-		for(j = 0; j < max_game_x; j++) {
-			if (k / 16) // reset the counter every time it hits 16 blocks
-				k = 0;
-			p_natural_block(lchunk_ptr[(k % 16) + ((l % 16) * max_chunk_x)].tile[l][k], current_tick % 16, j, i);
-			k++;
-		}
-		l++;
-	}
+	wrefresh(main_win);
 }
