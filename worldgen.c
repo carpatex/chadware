@@ -14,54 +14,57 @@ static int32_t noise_hash[] = {208, 34, 231, 213, 32, 248, 233, 56, 161, 78, 24,
 
 int32_t noise2(int32_t x, int32_t y, uint32_t full_seed)
 {
-	int32_t tmp = noise_hash[(y + full_seed) % 256];
-	return noise_hash[(tmp + x) % 256];
+	// Ajuste para coordenadas negativas usando módulo y asegurando que siempre sea positivo
+	int32_t tmp = noise_hash[((y + full_seed) % 256 + 256) % 256];  // Aseguramos que el índice esté entre 0 y 255
+	return noise_hash[((tmp + x) % 256 + 256) % 256];  // Lo mismo para x
 }
-
 float lin_inter(float x, float y, float s)
 {
 	return x + s * (y - x);
 }
 
-float smooth_inter(float x, float y, float s)
-{
-	return lin_inter(x, y, s * s * (3 - 2 * s));
+float smooth_inter(float x, float y, float s) {
+	// Curva de interpolación cúbica mejorada (Smoothstep)
+	return x + s * s * (3 - 2 * s) * (y - x); // Misma función, se incluye por claridad
 }
 
-float noise2d(float x, float y, uint32_t full_seed)
-{
-	int32_t x_int = x;
-	int32_t y_int = y;
+// Mejora principal: interpolación bilineal mejorada y escalado.
+float noise2d(float x, float y, uint32_t full_seed) {
+	int32_t x_int = (int32_t)floorf(x); // Usar floorf para asegurar comportamiento correcto con negativos
+	int32_t y_int = (int32_t)floorf(y);
 	float x_frac = x - x_int;
 	float y_frac = y - y_int;
-	int32_t s = noise2(x_int, y_int, full_seed);
-	int32_t t = noise2(x_int + 1, y_int, full_seed);
-	int32_t u = noise2(x_int, y_int + 1, full_seed);
-	int32_t v = noise2(x_int + 1, y_int + 1, full_seed);
+
+	// Generar los valores de ruido en las 4 esquinas.
+	float s = (float)noise2(x_int, y_int, full_seed) / 255.0f; // Normalizar a [0, 1]
+	float t = (float)noise2(x_int + 1, y_int, full_seed) / 255.0f;
+	float u = (float)noise2(x_int, y_int + 1, full_seed) / 255.0f;
+	float v = (float)noise2(x_int + 1, y_int + 1, full_seed) / 255.0f;
+
+	// Interpolación bilineal suave
 	float low = smooth_inter(s, t, x_frac);
 	float high = smooth_inter(u, v, x_frac);
-	return smooth_inter(low, high, y_frac);
+
+	return smooth_inter(low, high, y_frac); // El resultado ya está en [0, 1]
 }
 
-float perlin(uint32_t full_seed, float x, float y, float freq, int32_t depth)
-{
+float perlin(uint32_t full_seed, float x, float y, float freq, int32_t depth) {
 	float xa = x * freq;
 	float ya = y * freq;
-	float amp = 1.0;
-	float fin = 0;
-	float div = 0.0;
+	float amp = 1.0f;
+	float fin = 0.0f;
+	float div = 0.0f;
 
-	int32_t i;
-	for(i = 0; i < depth; i++)
-	{
-		div += 256 * amp;
+	for (int32_t i = 0; i < depth; i++) {
+		div += amp; // La división se simplifica ya que los valores de noise2d están normalizados.
 		fin += noise2d(xa, ya, full_seed) * amp;
-		amp /= 2;
-		xa *= 2;
-		ya *= 2;
+		amp /= 2.0f;
+		xa *= 2.0f;
+		ya *= 2.0f;
 	}
 
-	return fin/div;
+	// El resultado ya está normalizado gracias a la normalización en noise2d
+	return fin / div;
 }
 int32_t perlinint32(int32_t x, int32_t y, uint32_t full_seed) {
 	float f_result = perlin(full_seed, x + 0.1, y - 0.1, 0.0069420, 9) * 1000000;
@@ -77,37 +80,53 @@ int32_t get_earth_temp(struct Locator lc, int32_t seed, int32_t x, int32_t y) {
 }
 
 
+
+
 void gen_chunk_earth_surface(int32_t seed, struct LoadedChunk* chunk) {
 	int32_t i, j, curr_tile_temp, curr_tile_humidity, curr_height;
 	for (i = 0; i < CHUNK_N_TILES; i++) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
 			curr_tile_temp = get_earth_temp(chunk->location, seed, chunk->start_pos_x + j, chunk->start_pos_y + i);
 			curr_tile_humidity = get_earth_humidity(chunk->location, seed, chunk->start_pos_y + j + 1, chunk->start_pos_x + i - 1);
-			curr_height = perlinint32(chunk->start_pos_x + j, chunk->start_pos_y + i, seed) / 62500; // 24 possible layers, the first 8 are undeground
-			if ((curr_tile_humidity > 16 && curr_height < 5) && curr_tile_temp > 5) { // generate water
-				chunk->tile[j][i] = 86; // generate water5
+			curr_height = perlinint32(chunk->start_pos_x + j, chunk->start_pos_y + i, seed) / 62500; // 24 capas posibles, las primeras 8 son subterráneas
+
+			// Agua
+			if ((curr_tile_humidity > 16 && curr_height < 5) && curr_tile_temp > 5) {
+				chunk->tile[j][i] = 86; // Agua
 			}
+			// Hielo
 			else if (curr_height <= 5 && curr_tile_temp <= 9) {
-				chunk->tile[j][i] = 150; // generate ice5 on top of sea / river
+				chunk->tile[j][i] = 150; // Hielo
 			}
+			// Nieve
 			else if (curr_height >= 5 && curr_height < 11 && curr_tile_temp <= 9) {
-				chunk->tile[j][i] = 166 + curr_height - 5; // generate snow5 or higher on a dry or cold enough place
+				chunk->tile[j][i] = 166 + curr_height - 5; // Nieve (dependiendo de la altura)
 			}
+			// Hierba
 			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity > 15 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 6 + curr_height - 5; // generate grass5 or higher on most conditions
+				chunk->tile[j][i] = 6 + curr_height - 5; // Hierba
 			}
-			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity < 15 && curr_tile_humidity > 10 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 22 + curr_height - 5; // generate dirt5, drier than grass
+			// Tierra (condición intermedia de humedad)
+			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity > 10 && curr_tile_humidity <= 15 && curr_tile_temp > 10) {
+				chunk->tile[j][i] = 22 + curr_height - 5; // Tierra
 			}
+			// Arena (condición más seca)
 			else if (curr_height >= 5 && curr_height < 11 && curr_tile_humidity < 10 && curr_tile_temp > 10) {
-				chunk->tile[j][i] = 54 + curr_height - 5; // generate sand5 or higher, drier than dirt
+				chunk->tile[j][i] = 54 + curr_height - 5; // Arena
 			}
-			else if (curr_height >= 11 && curr_tile_temp > 11) {
-				chunk->tile[j][i] = 43 + curr_height - 11; // generate stone11 or higher on mountains (height higher or equal to 20) 
+			// Piedra
+			else if (curr_height >= 11 && curr_tile_temp > 7) {
+				chunk->tile[j][i] = 43 + curr_height - 11; // Piedra (a partir de altitudes elevadas)
+			}
+			// Caso por defecto (si no se cumple ninguna de las condiciones anteriores, asignamos una categoría básica)
+			else {
+				// Asignar un valor por defecto para evitar el 0. Este valor podría ser "tierra" o "roca" como un valor neutral.
+				chunk->tile[j][i] = 1; // Asignar tierra básica o un tile neutral (puede ajustarse según lo que se desee como valor por defecto)
 			}
 		}
 	}
 }
+
 
 void gen_chunk_earth_orbit(int32_t seed, struct LoadedChunk* chunk) {
 	switch (chunk->location.surface) {

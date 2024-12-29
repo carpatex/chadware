@@ -1,6 +1,7 @@
 #include "chadware.h"
 #include "chadgraphics.h"
-#define GAME_MEM 1024*128
+#include <ncurses.h>
+#define GAME_MEM 1024*256
 #define N_PLAYERS 1
 #define INFO_WIDTH 25
 /* tomma chelbek, sigma */
@@ -15,7 +16,9 @@ struct EntityPlayer *pj;
 struct EventGeneric *events_out;
 int32_t pos_x, pos_y, hp;
 void draw_game_content(int);
+
 int main() {
+	size_t ok_allocated;
 	size_t i;
 	char current_c;
 	int game = 1, size_x, old_size_x, size_y, old_size_y, ticks_elapsed = 0;
@@ -34,7 +37,8 @@ int main() {
 		return 1;
 	}
 	// allocate game memory and the strings (a 2d char array) for the players' names.
-	if (!init_heap_chadware(GAME_MEM)) {
+	ok_allocated = init_heap_chadware(GAME_MEM);
+	if (!ok_allocated) {
 		perror("Failed to allocate memory.");
 		return 1;
 	}
@@ -90,44 +94,43 @@ int main() {
 			info_win = newwin(size_y, INFO_WIDTH, 0, size_x - INFO_WIDTH);
 			main_win = newwin(size_y, size_x - INFO_WIDTH, 0, 0);
 		}
+		getmaxyx(main_win, max_game_y, max_game_x);
+		getbegyx(main_win, beg_game_y, beg_game_x);
 
+		draw_game_content(ticks_elapsed);
 		box(main_win, 0, 0);
+		wrefresh(main_win);
+
 		box(info_win, 0, 0);
 		// DRAW EVERYHTING
-		mvwprintw(main_win, 1, 1, "anashe");
 		mvwprintw(info_win, 1, 1, "SIZE_X: %d SIZE_Y: %d", getmaxx(stdscr), getmaxy(stdscr));
 		mvwprintw(info_win, 2, 1, "TPS: %.2lf", tps);
 		mvwprintw(info_win, 3, 1, "ELAPSED: %d", ticks_elapsed);
 		mvwprintw(info_win, 4, 1, "KEY: %c", current_c);
 		mvwprintw(info_win, 5, 1, "HP: %d", hp);
-		mvwprintw(info_win, 6, 1, "POS X: %d", pj_generic->pos.pos_x);
+		mvwprintw(info_win, 7, 1, "POS X: %d", pj_generic->pos.pos_x);
+		mvwprintw(info_win, 6, 1, "POS Y: %d", pj_generic->pos.pos_y);
 		wrefresh(info_win);
 		// DRAW EVERYTHING RELATED TO THE GAME'S WORLD HERE
 		if (tick(n_events_input, events_in, &n_events_output, events_out) == -1) {
 			goto gracefully_exit;
 		}
-		getmaxyx(main_win, max_game_y, max_game_x);
-		getbegyx(main_win, beg_game_y, beg_game_x);
-
-		draw_game_content(ticks_elapsed);
 		//print_grass(ticks_elapsed % 96, 1, 1, 10);
-	//	reset_color_pairs();
-		wrefresh(main_win);
+		//	reset_color_pairs();
 		current_c = ' ';
-		switch(getch()){
-			case 'w':
-			case 'W':
-				current_c = 'w';
-				break;
-			case 'Q':
-			case 'q':
-				game = 0;
-				break;
+
+		switch (getch()) {
+			case 'w': case 'W': pj_generic->pos.pos_y++; break;
+			case 's': case 'S': pj_generic->pos.pos_y--; break;
+			case 'a': case 'A': pj_generic->pos.pos_x--; break;
+			case 'd': case 'D': pj_generic->pos.pos_x++; break;
+			case 'Q': case 'q': game = 0; break;
 		}
+		wclear(info_win);
 		while(clock() < oldtime + NEXT_TICK);
 		ticks_elapsed++;
-		pj_generic->pos.pos_x += 1;
 	}
+	wattr_set(main_win, A_NORMAL, 0, NULL);
 gracefully_exit:
 	endwin();
 	free(events_in);
@@ -135,7 +138,64 @@ gracefully_exit:
 	return 0;
 }
 
+
+
+
+
+
 void draw_game_content(int current_tick) {
-	size_t i, j, k, l;
-	wrefresh(main_win);
+	int32_t i, j, k, chunk_index, tile_x, tile_y;
+	int32_t max_chunk_x, max_chunk_y;
+	int32_t start_chunk_x, start_chunk_y;
+
+	// Cálculos para el número de chunks a mostrar en pantalla
+	max_chunk_x = (int32_t)ceil((float)max_game_x / 16.0);
+	max_chunk_y = (int32_t)ceil((float)max_game_y / 16.0);
+
+	// Cálculo del chunk de inicio en X y Y basado en la posición del jugador
+	start_chunk_x = (pj_generic->pos.pos_x / 16) - (max_chunk_x / 2);
+	start_chunk_y = (pj_generic->pos.pos_y / 16) - (max_chunk_y / 2);
+
+	// Generación de los chunks para ser dibujados
+	k = 0;  // Reiniciar contador
+	for (i = 0; i < max_chunk_y; i++) {
+		for (j = 0; j < max_chunk_x; j++) {
+			int chunk_x = start_chunk_x + j;
+			int chunk_y = start_chunk_y + i;
+
+			// Manejar coordenadas negativas correctamente
+			lchunk_ptr[k].start_pos_x = chunk_x * 16;
+			lchunk_ptr[k].start_pos_y = chunk_y * 16;
+			lchunk_ptr[k].location = pj_generic->location;
+
+			// Generar el chunk
+			gen_chunk(seed, &lchunk_ptr[k]);
+
+			k++;  // Incrementar índice del chunk
+		}
+	}
+
+	// Dibujando los bloques de todos los chunks visibles en la pantalla
+	for (i = 0; i < max_game_y; i++) {
+		for (j = 0; j < max_game_x; j++) {
+			// Calcular el índice del chunk correspondiente
+			int global_x = start_chunk_x * 16 + j;
+			int global_y = start_chunk_y * 16 + i;
+			chunk_index = (global_x / 16 - start_chunk_x) + 
+				(global_y / 16 - start_chunk_y) * max_chunk_x;
+
+			// Verificar que el índice del chunk esté dentro del rango válido
+			if (chunk_index < 0 || chunk_index >= max_chunk_x * max_chunk_y) {
+				continue;
+			}
+
+			// Calcular las posiciones relativas del tile dentro del chunk
+			tile_x = global_x % 16;
+			tile_y = global_y % 16;
+
+			// Dibujar el bloque en la pantalla
+			p_natural_block(lchunk_ptr[chunk_index].tile[tile_y][tile_x], current_tick % 96, j, i);
+		}
+	}
 }
+

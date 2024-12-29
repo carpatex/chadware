@@ -60,7 +60,7 @@ char i14toh(int32_t n, int32_t start_point) {
 void init_char_colors() {
 	init_pair(1, COLOR_WHITE, COLOR_GREEN);
 	init_pair(2, COLOR_BLACK, COLOR_WHITE);
-	init_pair(3, COLOR_WHITE, COLOR_BLACK);
+	init_pair(3, COLOR_WHITE, 8);
 	init_pair(4, COLOR_WHITE, COLOR_YELLOW);
 	init_pair(5, COLOR_BLACK, 11);
 	init_pair(6, COLOR_WHITE, COLOR_BLUE);
@@ -70,57 +70,62 @@ void init_char_colors() {
 	init_pair(10, 8, 12);
 	init_pair(11, 8, COLOR_WHITE);
 }
-void p_natural_block(int32_t tile_id, int8_t n_anim, int x, int y) {
-	char block_character;
 
-	if (tile_id >= 1 && tile_id <= 16) { // grass
-		wattr_set(main_win, A_NORMAL, 1, NULL);
-		block_character = '~';
-	}
-	if (tile_id >= 17 && tile_id <= 32) { // dirt
-		wattr_set(main_win, A_NORMAL, 2, NULL);
-		block_character = '+';
-	}
-	if (tile_id >= 33 && tile_id <= 48) { // stone
-		wattr_set(main_win, A_NORMAL, 3, NULL);
-		block_character = '@';
-	}
-	if (tile_id >= 49 && tile_id <= 64) { // sand
-		wattr_set(main_win, A_NORMAL, 4, NULL);
-		block_character = '#';
-	}
-	if (tile_id >= 65 && tile_id <= 80) { // sandstone
-		wattr_set(main_win, A_NORMAL, 5, NULL);
-		block_character = '[';
-	}
-	if (tile_id >= 81 && tile_id <= 96) { // water 
-		wattr_set(main_win, A_NORMAL, 6, NULL);
-		block_character = '=';
-	}
-	if (tile_id >= 97 && tile_id <= 112) { // lava 
-		wattr_set(main_win, A_NORMAL, 7, NULL);
-		block_character = '=';
-	}
-	if (tile_id >= 113 && tile_id <= 128) { // clay
-		wattr_set(main_win, A_NORMAL, 8, NULL);
-		block_character = '0';
-	}
-	if (tile_id >= 129 && tile_id <= 144) { // gravel
-		wattr_set(main_win, A_NORMAL, 9, NULL);
-		block_character = '&';
-	} 
-	if (tile_id >= 145 && tile_id <= 160) { // ice
-		wattr_set(main_win, A_NORMAL, 10, NULL);
-		block_character = '$';
-	}
-	if (tile_id >= 161 && tile_id <= 176) { // snow
-		wattr_set(main_win, A_NORMAL, 11, NULL);
-		block_character = '@';
-	}
-	if (n_anim > 50) {
-		mvwaddch(main_win, y, x, i14toh((tile_id - 1) % 16, 1));
-	}
-	else {
-		mvwaddch(main_win, y, x, block_character);
-	}
+void p_natural_block(int32_t tile_id, int8_t n_anim, int x, int y) {
+    char block_character;
+    int color_pair;
+
+    // Determinar el tipo de bloque según tile_id
+    if (tile_id >= 1 && tile_id <= 16) {          // grass
+        color_pair = 1;
+        block_character = '~';
+    } else if (tile_id >= 17 && tile_id <= 32) {  // dirt
+        color_pair = 2;
+        block_character = '+';
+    } else if (tile_id >= 33 && tile_id <= 48) {  // stone
+        color_pair = 3;
+        block_character = '@';
+    } else if (tile_id >= 49 && tile_id <= 64) {  // sand
+        color_pair = 4;
+        block_character = '#';
+    } else if (tile_id >= 65 && tile_id <= 80) {  // sandstone
+        color_pair = 5;
+        block_character = '[';
+    } else if (tile_id >= 81 && tile_id <= 96) {  // water
+        color_pair = 6;
+        block_character = '=';
+    } else if (tile_id >= 97 && tile_id <= 112) { // lava
+        color_pair = 7;
+        block_character = '=';
+    } else if (tile_id >= 113 && tile_id <= 128) { // clay
+        color_pair = 8;
+        block_character = '0';
+    } else if (tile_id >= 129 && tile_id <= 144) { // gravel
+        color_pair = 9;
+        block_character = '&';
+    } else if (tile_id >= 145 && tile_id <= 160) { // ice
+        color_pair = 10;
+        block_character = '$';
+    } else if (tile_id >= 161 && tile_id <= 176) { // snow
+        color_pair = 11;
+        block_character = '@';
+    } else {
+        // Manejo de errores: bloque desconocido
+        color_pair = 0;  // Default color pair
+        block_character = '?';
+    }
+
+    // Aplicar atributos de color
+    wattr_set(main_win, A_NORMAL, color_pair, NULL);
+
+    // Animación o carácter estático
+    if (n_anim > 50) {
+        // Dibujar carácter animado
+        mvwaddch(main_win, y, x, i14toh((tile_id - 1) % 16, 1));
+    } else {
+        // Dibujar carácter estático
+        mvwaddch(main_win, y, x, block_character);
+    }
 }
+
+
