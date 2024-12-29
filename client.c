@@ -1,3 +1,4 @@
+
 #include "chadware.h"
 #include "chadgraphics.h"
 #include <ncurses.h>
@@ -35,7 +36,7 @@ int main() {
     size_t ticks_elapsed = 0;
     char current_c = ' ';
     int game = 1, size_x, size_y;
-    clock_t oldtime = clock();
+    clock_t oldtime = clock(), delta;
     double tps;
 
     // Initialization
@@ -45,9 +46,8 @@ int main() {
 
     // Main game loop
     while (game) {
-        // Calculate ticks per second (TPS)
-        clock_t delta = clock() - oldtime;
-        tps = (delta > 0) ? (1.0 / delta) * CLOCKS_PER_SEC : 0;
+        delta = clock() - oldtime;
+        tps = (1.0 / delta) * CLOCKS_PER_SEC;
         oldtime = clock();
 
         handle_resize(&size_x, &size_y);
@@ -61,6 +61,9 @@ int main() {
         handle_input(&game);
 
         ticks_elapsed++;
+
+        // Wait until the next tick
+        while (clock() < oldtime + NEXT_TICK);
     }
 
     // Cleanup
@@ -249,3 +252,4 @@ void cleanup() {
     }
     free(players);
 }
+
