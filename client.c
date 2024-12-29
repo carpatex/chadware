@@ -52,7 +52,6 @@ int main() {
 
         handle_resize(&size_x, &size_y);
 
-        wclear(main_win);  // Clear the main window before drawing
         draw_game_content(ticks_elapsed);
         wrefresh(main_win);  // Ensure main window is updated
 
