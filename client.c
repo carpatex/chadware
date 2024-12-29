@@ -167,28 +167,44 @@ void draw_ui(int ticks_elapsed, double tps, char current_c) {
 void handle_input(int *game) {
     char current_c = getch();
     switch (current_c) {
-        case 'w': case 'W': pj_generic->pos.pos_y+=3; break;
-        case 's': case 'S': pj_generic->pos.pos_y-=3; break;
-        case 'a': case 'A': pj_generic->pos.pos_x-=3; break;
-        case 'd': case 'D': pj_generic->pos.pos_x+=3; break;
+        case 'w': case 'W': pj_generic->pos.pos_y++; break;
+        case 's': case 'S': pj_generic->pos.pos_y--; break;
+        case 'a': case 'A': pj_generic->pos.pos_x--; break;
+        case 'd': case 'D': pj_generic->pos.pos_x++; break;
         case 'q': case 'Q': *game = 0; break;
         default: break;
     }
 }
 
+void draw_game_content(int current_tick) {
+    int32_t i, j, k, chunk_index, tile_x, tile_y;
+    int32_t max_chunk_x, max_chunk_y;
+    int32_t start_chunk_x, start_chunk_y;
 
-void draw_game_content(GameState *gameState) {
-    for (int i = 0; i < gameState->chunks_count; i++) {
-        struct LoadedChunk *chunk = &gameState->chunks[i];
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
-                int tile_id = chunk->tiles[x][y];
-                p_natural_block(tile_id, 0, chunk->location.x + x, chunk->location.y + y);
-            }
+    // Calculate the number of chunks to display on the screen
+    max_chunk_x = (int32_t)ceil((float)max_game_x / 16.0);
+    max_chunk_y = (int32_t)ceil((float)max_game_y / 16.0);
+
+    // Calculate the starting chunk based on the player's position
+    start_chunk_x = (pj_generic->pos.pos_x / 16) - (max_chunk_x / 2);
+    start_chunk_y = (pj_generic->pos.pos_y / 16) - (max_chunk_y / 2);
+
+    k = 0; // Reset chunk counter
+    for (i = 0; i < max_chunk_y; i++) {
+        for (j = 0; j < max_chunk_x; j++) {
+            int chunk_x = start_chunk_x + j;
+            int chunk_y = start_chunk_y + i;
+
+            // Handle negative coordinates correctly
+            lchunk_ptr[k].start_pos_x = chunk_x * 16;
+            lchunk_ptr[k].start_pos_y = chunk_y * 16;
+            lchunk_ptr[k].location = pj_generic->location;
+
+            // Generate the chunk
+            gen_chunk(seed, &lchunk_ptr[k]);
+
+            k++; // Increment chunk index
         }
-    }
-}
-
     }
 
     // Draw blocks with inverted Y-axis

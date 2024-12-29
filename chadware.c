@@ -111,38 +111,18 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 	// do world gen
 	return 0;
 }
-
 int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_event_out, struct EventGeneric *event_out_list) {
-    int32_t i;
-    for (i = 0; i < n_event_in; i++) {
-        switch (event_in_list[i].event_id) {
-            case -1:
-                free(heap);
-                return 1;
-            case 2: // movement 
-                handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
-            default:
-                fprintf(stderr, "Invalid event id %d.
-", event_in_list[i].event_id);
-        }
-    }
-    if (curr_tick == UINT32_MAX) {
-        curr_tick = 0;
-    } else {
-        curr_tick++;
-    }
-
-    // Update chunks logic
-    update_chunks(&gameState);
-
-    // Generate new chunks if necessary
-    for (int i = 0; i < gameState.chunks_count; i++) {
-        gen_chunk(gameState.seed, &gameState.chunks[i]);
-    }
-    
-    return 0;
-}
-
+	int32_t i;
+	for (i = 0; i < n_event_in; i++) {
+		switch (event_in_list[i].event_id) {
+			case -1:
+				free(heap);
+				return 1;
+			case 2: // movement 
+				handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
+			default:
+				fprintf(stderr, "Invalid event id %d.\n", event_in_list[i].event_id);
+		}
 	}
 	if(curr_tick == UINT32_MAX) {
 		curr_tick = 0;
