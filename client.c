@@ -179,7 +179,13 @@ void handle_input(int *game) {
 
 void draw_game_content(GameState *gameState) {
     for (int i = 0; i < gameState->chunks_count; i++) {
-        draw_chunk(gameState->chunks[i]);
+        struct LoadedChunk *chunk = &gameState->chunks[i];
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                int tile_id = chunk->tiles[x][y];
+                p_natural_block(tile_id, 0, chunk->location.x + x, chunk->location.y + y);
+            }
+        }
     }
 }
 

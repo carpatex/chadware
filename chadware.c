@@ -111,42 +111,6 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 	// do world gen
 	return 0;
 }
-int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_event_out, struct EventGeneric *event_out_list) {
-	int32_t i;
-	for (i = 0; i < n_event_in; i++) {
-		switch (event_in_list[i].event_id) {
-			case -1:
-				free(heap);
-				return 1;
-			case 2: // movement 
-				handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
-			default:
-				fprintf(stderr, "Invalid event id %d.\n", event_in_list[i].event_id);
-		}
-	}
-	if(curr_tick == UINT32_MAX) {
-		curr_tick = 0;
-		curr_tick_epoch++;
-	}
-
-	return 0;
-}
-
-
-void update_chunks(GameState *gameState) {
-    int32_t max_chunk_x = (int32_t)ceil((float)gameState->max_game_x / 16.0);
-    int32_t max_chunk_y = (int32_t)ceil((float)gameState->max_game_y / 16.0);
-
-    int32_t start_chunk_x = (gameState->player.x / 16) - (max_chunk_x / 2);
-    int32_t start_chunk_y = (gameState->player.y / 16) - (max_chunk_y / 2);
-
-    // Load necessary chunks
-    for (int x = start_chunk_x; x < start_chunk_x + max_chunk_x; x++) {
-        for (int y = start_chunk_y; y < start_chunk_y + max_chunk_y; y++) {
-            load_chunk(x, y, gameState->chunks);
-        }
-    }
-}
 
 int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_event_out, struct EventGeneric *event_out_list) {
     int32_t i;
@@ -158,7 +122,8 @@ int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_
             case 2: // movement 
                 handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
             default:
-                fprintf(stderr, "Invalid event id %d.\n", event_in_list[i].event_id);
+                fprintf(stderr, "Invalid event id %d.
+", event_in_list[i].event_id);
         }
     }
     if (curr_tick == UINT32_MAX) {
@@ -169,6 +134,21 @@ int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_
 
     // Update chunks logic
     update_chunks(&gameState);
+
+    // Generate new chunks if necessary
+    for (int i = 0; i < gameState.chunks_count; i++) {
+        gen_chunk(gameState.seed, &gameState.chunks[i]);
+    }
     
     return 0;
 }
+
+	}
+	if(curr_tick == UINT32_MAX) {
+		curr_tick = 0;
+		curr_tick_epoch++;
+	}
+
+	return 0;
+}
+
