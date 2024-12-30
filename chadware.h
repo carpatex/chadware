@@ -70,6 +70,10 @@ struct NPC {
 	int32_t civ;
 	int16_t role;
 };
+struct EntityPosition {
+	int32_t pos_x;
+	int32_t pos_y;
+};
 struct EntityPositionSurface {
 	int32_t pos_x;
 	int8_t motion_pos_x;
@@ -91,6 +95,8 @@ struct Item {
 	void *extra_data;
 };
 struct EntityPlayer {
+	struct EntityPosition chunk_nw_limit;
+	struct EntityPosition chunk_se_limit;
 	int32_t max_hp;
 	int32_t hp;
 	int32_t xp;
@@ -105,6 +111,10 @@ struct EventGeneric { //general struct for events. each particular type of event
 	int32_t event_id;
 	size_t data_size;
 	void *data;
+};
+struct GenChunkEvent {
+	int32_t entity_index_id;
+	struct LoadedChunk* output;
 };
 struct MotionEvent { // struct for movement of entities &/or players
 	struct EntityGeneric *target;

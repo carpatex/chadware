@@ -111,6 +111,11 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 	// do world gen
 	return 0;
 }
+void handleGenChunkEvent(struct GenChunkEvent *event) {
+	struct EntityPlayer* pj;
+	pj = entityg_ptr[event->entity_index_id].data;
+	// use chunk_nw_limit and chunk_se_limit to find the limits of the area to generate chunks, then do it
+}
 int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_event_out, struct EventGeneric *event_out_list) {
 	int32_t i;
 	for (i = 0; i < n_event_in; i++) {
@@ -120,6 +125,10 @@ int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_
 				return 1;
 			case 2: // movement 
 				handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
+				break;
+			case 3:
+				handleGenChunkEvent((struct GenChunkEvent *) event_in_list[i].data);
+				break;
 			default:
 				fprintf(stderr, "Invalid event id %d.\n", event_in_list[i].event_id);
 		}
