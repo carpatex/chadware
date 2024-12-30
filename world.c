@@ -1,10 +1,26 @@
 #include "chadware.h"
 
+struct LoadedChunk* find_chunk(int32_t x, int32_t y, struct Locator loc, struct LoadedChunk* chunks, size_t n_chunks) {
+	for (size_t i = 0; i < n_chunks; i++) {
+		struct LoadedChunk* chunk = &chunks[i];
+		if (chunk->location.dimension == loc.dimension &&
+				chunk->location.galaxy == loc.galaxy &&
+				chunk->location.planetary_system == loc.planetary_system &&
+				chunk->location.orbit == loc.orbit &&
+				chunk->location.surface == loc.surface &&
+				chunk->location.subsurface == loc.subsurface &&
+				chunk->start_pos_x <= x && x < chunk->start_pos_x + CHUNK_N_TILES &&
+				chunk->start_pos_y <= y && y < chunk->start_pos_y + CHUNK_N_TILES) {
+			return chunk;
+		}
+	}
+	return NULL; // No se encontró el chunk
+}
 struct ToplevelTerrain* findToplevel(struct Locator *location) {
 	size_t i;
 	for (i = 0; i < n_toplevel_terrain; i++) {
 		if (!memcmp(location, &toplevel_terrain_ptr[i].hierarchy, sizeof(struct Locator)))
-				return &toplevel_terrain_ptr[i];
+			return &toplevel_terrain_ptr[i];
 	}
 	return NULL;
 }
@@ -70,7 +86,7 @@ void compress_chunk16(struct LoadedChunk *chunk, int16_t *packed_values_used, in
 	for (i = 0; i < CHUNK_N_TILES; i++) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
 			if (i == 0 || j == 0 || (chunk)->extra_tile[i][j] != (chunk)->extra_tile[i - 1][j] ||
-				(chunk)->extra_tile[i][j] != (chunk)->extra_tile[i][j - 1]) {
+					(chunk)->extra_tile[i][j] != (chunk)->extra_tile[i][j - 1]) {
 				start_x = i;
 				start_y = j;
 				end_x = i;
