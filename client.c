@@ -1,9 +1,6 @@
-
 #include "chadware.h"
 #include "chadgraphics.h"
 #include <ncurses.h>
-#include <unistd.h>
-#include <math.h>
 
 #define GAME_MEM 1024*256
 #define N_PLAYERS 1
@@ -223,50 +220,50 @@ void handle_input(int *game) {
 
 
 void draw_game_content(int ticks_elapsed) {
-    int32_t i, j;
-    int32_t start_x, start_y;
+	int32_t i, j;
+	int32_t start_x, start_y;
 
-    // Calcular las posiciones globales iniciales (origen en la pantalla)
-    start_x = pj_generic->pos.pos_x - (max_game_x / 2);
-    start_y = pj_generic->pos.pos_y - (max_game_y / 2);
+	// Calcular las posiciones globales iniciales (origen en la pantalla)
+	start_x = pj_generic->pos.pos_x - (max_game_x / 2);
+	start_y = pj_generic->pos.pos_y - (max_game_y / 2);
 
-    // Iterar a través de cada tile visible en la pantalla
-    for (i = 0; i < max_game_y; i++) {
-        for (j = 0; j < max_game_x; j++) {
-            // Calcular las coordenadas globales de cada tile
-            int global_x = start_x + j;
-            int global_y = start_y + (max_game_y - i - 1); // Invertir el eje Y
+	// Iterar a través de cada tile visible en la pantalla
+	for (i = 0; i < max_game_y; i++) {
+		for (j = 0; j < max_game_x; j++) {
+			// Calcular las coordenadas globales de cada tile
+			int global_x = start_x + j;
+			int global_y = start_y + (max_game_y - i - 1); // Invertir el eje Y
 
-            // Determinar las coordenadas del chunk que contiene el tile
-            int chunk_x = global_x / 16;
-            int chunk_y = global_y / 16;
+			// Determinar las coordenadas del chunk que contiene el tile
+			int chunk_x = global_x / 16;
+			int chunk_y = global_y / 16;
 
-            // Ajustar coordenadas para números negativos
-            if (global_x < 0) chunk_x = (global_x - 15) / 16;
-            if (global_y < 0) chunk_y = (global_y - 15) / 16;
+			// Ajustar coordenadas para números negativos
+			if (global_x < 0) chunk_x = (global_x - 15) / 16;
+			if (global_y < 0) chunk_y = (global_y - 15) / 16;
 
-            // Calcular el índice del chunk en `client_chunks`
-            int chunk_index = (chunk_x - (pj_generic->pos.pos_x / 16 - max_game_x / 32)) + 
-                              (chunk_y - (pj_generic->pos.pos_y / 16 - max_game_y / 32)) * (max_game_x / 16);
+			// Calcular el índice del chunk en `client_chunks`
+			int chunk_index = (chunk_x - (pj_generic->pos.pos_x / 16 - max_game_x / 32)) + 
+				(chunk_y - (pj_generic->pos.pos_y / 16 - max_game_y / 32)) * (max_game_x / 16);
 
-            // Verificar si el índice del chunk es válido
-            if (chunk_index < 0 || chunk_index >= (max_game_x / 16) * (max_game_y / 16)) {
-                continue;
-            }
+			// Verificar si el índice del chunk es válido
+			if (chunk_index < 0 || chunk_index >= (max_game_x / 16) * (max_game_y / 16)) {
+				continue;
+			}
 
-            // Calcular las coordenadas del tile dentro del chunk
-            int tile_x = (global_x % 16 + 16) % 16;
-            int tile_y = (global_y % 16 + 16) % 16;
+			// Calcular las coordenadas del tile dentro del chunk
+			int tile_x = (global_x % 16 + 16) % 16;
+			int tile_y = (global_y % 16 + 16) % 16;
 
-            // Verificar si el tile existe dentro del chunk
-            if (!client_chunks[chunk_index].tile || !client_chunks[chunk_index].tile[tile_y]) {
-                continue;
-            }
+			// Verificar si el tile existe dentro del chunk
+			if (!client_chunks[chunk_index].tile || !client_chunks[chunk_index].tile[tile_y]) {
+				continue;
+			}
 
-            // Dibujar el bloque individual
-            p_natural_block(client_chunks[chunk_index].tile[tile_y][tile_x], ticks_elapsed % 96, j, i);
-        }
-    }
+			// Dibujar el bloque individual
+			p_natural_block(client_chunks[chunk_index].tile[tile_y][tile_x], ticks_elapsed % 96, j, i);
+		}
+	}
 }
 
 
