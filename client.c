@@ -64,6 +64,7 @@ int main() {
 		handle_resize();
 		tick(n_events_input, events_in, &n_events_output, events_out);
 
+		wclear(main_win);
 		draw_game_content(ticks_elapsed);
 		wrefresh(main_win);  // Ensure main window is updated
 
@@ -220,65 +221,52 @@ void handle_input(int *game) {
 }
 
 
+
 void draw_game_content(int ticks_elapsed) {
-	int32_t i, j, k, chunk_index, tile_x, tile_y;
-	int32_t max_chunk_x, max_chunk_y;
-	int32_t start_chunk_x, start_chunk_y;
+    int32_t i, j;
+    int32_t start_x, start_y;
 
-	// Calculate the number of chunks to display on the screen
-	max_chunk_x = (int32_t)ceil((float)max_game_x / 16.0);
-	max_chunk_y = (int32_t)ceil((float)max_game_y / 16.0);
+    // Calcular las posiciones globales iniciales (origen en la pantalla)
+    start_x = pj_generic->pos.pos_x - (max_game_x / 2);
+    start_y = pj_generic->pos.pos_y - (max_game_y / 2);
 
-	// Calculate the starting chunk based on the player's position
-	start_chunk_x = (pj_generic->pos.pos_x / 16) - (max_chunk_x / 2);
-	start_chunk_y = (pj_generic->pos.pos_y / 16) - (max_chunk_y / 2);
+    // Iterar a través de cada tile visible en la pantalla
+    for (i = 0; i < max_game_y; i++) {
+        for (j = 0; j < max_game_x; j++) {
+            // Calcular las coordenadas globales de cada tile
+            int global_x = start_x + j;
+            int global_y = start_y + (max_game_y - i - 1); // Invertir el eje Y
 
-	k = 0; // Reset chunk counter
-	for (i = 0; i < max_chunk_y; i++) {
-		for (j = 0; j < max_chunk_x; j++) {
-			int chunk_x = start_chunk_x + j;
-			int chunk_y = start_chunk_y + i;
+            // Determinar las coordenadas del chunk que contiene el tile
+            int chunk_x = global_x / 16;
+            int chunk_y = global_y / 16;
 
-			// Handle negative coordinates correctly
-			client_chunks[k].start_pos_x = chunk_x * 16;
-			client_chunks[k].start_pos_y = chunk_y * 16;
-			client_chunks[k].location = pj_generic->location;
+            // Ajustar coordenadas para números negativos
+            if (global_x < 0) chunk_x = (global_x - 15) / 16;
+            if (global_y < 0) chunk_y = (global_y - 15) / 16;
 
-			k++; // Increment chunk index
-		}
-	}
+            // Calcular el índice del chunk en `client_chunks`
+            int chunk_index = (chunk_x - (pj_generic->pos.pos_x / 16 - max_game_x / 32)) + 
+                              (chunk_y - (pj_generic->pos.pos_y / 16 - max_game_y / 32)) * (max_game_x / 16);
 
-	// Draw blocks with inverted Y-axis
-	for (i = 0; i < max_game_y; i++) {
-		for (j = 0; j < max_game_x; j++) {
-			// Calculate global coordinates with inverted Y-axis
-			int global_x = start_chunk_x * 16 + j;
-			int global_y = start_chunk_y * 16 + (max_game_y - i - 1); // Invert Y-axis
+            // Verificar si el índice del chunk es válido
+            if (chunk_index < 0 || chunk_index >= (max_game_x / 16) * (max_game_y / 16)) {
+                continue;
+            }
 
-			// Calculate the index of the corresponding chunk
-			int chunk_x_index = (global_x >= 0 ? global_x / 16 : (global_x - 15) / 16) - start_chunk_x;
-			int chunk_y_index = (global_y >= 0 ? global_y / 16 : (global_y - 15) / 16) - start_chunk_y;
+            // Calcular las coordenadas del tile dentro del chunk
+            int tile_x = (global_x % 16 + 16) % 16;
+            int tile_y = (global_y % 16 + 16) % 16;
 
-			chunk_index = chunk_x_index + chunk_y_index * max_chunk_x;
+            // Verificar si el tile existe dentro del chunk
+            if (!client_chunks[chunk_index].tile || !client_chunks[chunk_index].tile[tile_y]) {
+                continue;
+            }
 
-			// Verify chunk index is within valid range
-			if (chunk_index < 0 || chunk_index >= max_chunk_x * max_chunk_y) {
-				continue;
-			}
-
-			// Calculate tile positions within the chunk
-			tile_x = ((global_x % 16) + 16) % 16;
-			tile_y = ((global_y % 16) + 16) % 16;
-
-			// Verify if the tile exists
-			if (!client_chunks[chunk_index].tile || !client_chunks[chunk_index].tile[tile_y]) {
-				continue;
-			}
-
-			// Draw the block with inverted vertical position
-			p_natural_block(client_chunks[chunk_index].tile[tile_y][tile_x], ticks_elapsed % 96, j, i);
-		}
-	}
+            // Dibujar el bloque individual
+            p_natural_block(client_chunks[chunk_index].tile[tile_y][tile_x], ticks_elapsed % 96, j, i);
+        }
+    }
 }
 
 
