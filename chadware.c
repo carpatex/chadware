@@ -114,7 +114,7 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 void handleGenChunkEvent(struct GenChunkEvent *event) {
 	int32_t chunk_count = 0;
 
-	// Localizar al jugador usando entityg_ptr y el índice proporcionado
+	// Localizar al jugador
 	struct EntityGeneric *player_entity = &entityg_ptr[event->entity_index];
 	if (!player_entity || !player_entity->data) {
 		fprintf(stderr, "Entidad de jugador no válida en índice %d.\n", event->entity_index);
@@ -125,10 +125,10 @@ void handleGenChunkEvent(struct GenChunkEvent *event) {
 	struct EntityPlayer *player = (struct EntityPlayer *)player_entity->data;
 
 	// Calcular límites en coordenadas de "chunk"
-	int32_t start_chunk_x = player->ep_limit_nw.pos_x / 16;
-	int32_t start_chunk_y = player->ep_limit_nw.pos_y / 16;
-	int32_t end_chunk_x = player->ep_limit_se.pos_x / 16;
-	int32_t end_chunk_y = player->ep_limit_se.pos_y / 16;
+	int32_t start_chunk_x = player->ep_limit_nw.pos_x / CHUNK_N_TILES;
+	int32_t start_chunk_y = player->ep_limit_nw.pos_y / CHUNK_N_TILES;
+	int32_t end_chunk_x = player->ep_limit_se.pos_x / CHUNK_N_TILES;
+	int32_t end_chunk_y = player->ep_limit_se.pos_y / CHUNK_N_TILES;
 
 	// Generar "chunks" dentro de los límites del jugador
 	for (int y = start_chunk_y; y <= end_chunk_y; y++) {
@@ -138,19 +138,24 @@ void handleGenChunkEvent(struct GenChunkEvent *event) {
 				return;
 			}
 
+			// Verificar si el chunk ya existe usando findChunk
+			if (findChunk(x, y, player_entity->location, event->target, chunk_count)) {
+				continue; // Chunk ya cargado, saltar
+			}
+
 			struct LoadedChunk *current_chunk = &event->target[chunk_count];
 
-			// Inicializar coordenadas y datos del "chunk"
-			current_chunk->start_pos_x = x * 16;
-			current_chunk->start_pos_y = y * 16;
+			// Inicializar coordenadas y datos del chunk
+			current_chunk->start_pos_x = x * CHUNK_N_TILES;
+			current_chunk->start_pos_y = y * CHUNK_N_TILES;
 			current_chunk->location = player_entity->location;
 
-			// Generar el "chunk" usando la función global gen_chunk
+			// Generar el chunk
 			gen_chunk(seed, current_chunk);
 
-			// Verificar si los datos del "chunk" son válidos
+			// Validar el chunk generado
 			if (!current_chunk->tile) {
-				fprintf(stderr, "El 'chunk' generado en (%d, %d) no contiene datos.\n", x, y);
+				fprintf(stderr, "El chunk generado en (%d, %d) no contiene datos.\n", x, y);
 				continue;
 			}
 
@@ -158,7 +163,6 @@ void handleGenChunkEvent(struct GenChunkEvent *event) {
 		}
 	}
 }
-
 int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_event_out, struct EventGeneric *event_out_list) {
 	int32_t i;
 	for (i = 0; i < n_event_in; i++) {

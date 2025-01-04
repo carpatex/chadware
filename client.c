@@ -153,20 +153,20 @@ void handle_resize() {
 	static int old_size_x = 0, old_size_y = 0;
 
 	// Obtener las dimensiones actuales de la pantalla
-	getmaxyx(stdscr, max_game_y, max_game_x); // max_game_x y max_game_y son variables globales
-	getbegyx(stdscr, beg_game_y, beg_game_x);  // Estas variables también se actualizan
+	getmaxyx(stdscr, max_game_y, max_game_x);
+	getbegyx(stdscr, beg_game_y, beg_game_x);
 
 	// Si las dimensiones de la pantalla cambiaron, ajustamos las ventanas
 	if (max_game_x != old_size_x || max_game_y != old_size_y) {
-		resizeterm(max_game_y, max_game_x); // Redimensionar la terminal según los nuevos tamaños
-		info_win = newwin(max_game_y, INFO_WIDTH, 0, max_game_x - INFO_WIDTH); // Actualizar ventana de información
-		main_win = newwin(max_game_y, max_game_x - INFO_WIDTH, 0, 0);            // Actualizar ventana principal
+		resizeterm(max_game_y, max_game_x);
+		info_win = newwin(max_game_y, INFO_WIDTH, 0, max_game_x - INFO_WIDTH);
+		main_win = newwin(max_game_y, max_game_x - INFO_WIDTH, 0, 0);
 		old_size_x = max_game_x;
 		old_size_y = max_game_y;
 	}
 
-	// Acceder al jugador a través de entityg_ptr y su índice (suponemos que el jugador es el índice 0)
-	struct EntityGeneric *player_entity = &entityg_ptr[0]; // Suponiendo que el índice 0 es el jugador
+	// Localizar al jugador
+	struct EntityGeneric *player_entity = &entityg_ptr[0];
 	if (!player_entity || !player_entity->data) {
 		fprintf(stderr, "Jugador no encontrado o datos inválidos.\n");
 		return;
@@ -175,21 +175,21 @@ void handle_resize() {
 	// Obtener datos específicos del jugador
 	struct EntityPlayer *player = (struct EntityPlayer *)player_entity->data;
 
-	// Obtener las coordenadas de la posición del jugador
-	int32_t player_pos_x = player_entity->pos.pos_x;  // Usar pos_x de EntityPositionSurface
-	int32_t player_pos_y = player_entity->pos.pos_y;  // Usar pos_y de EntityPositionSurface
+	// Obtener coordenadas del jugador
+	int32_t player_pos_x = player_entity->pos.pos_x;
+	int32_t player_pos_y = player_entity->pos.pos_y;
 
-	// Ahora ajustamos los límites de los chunks con base en la posición central del jugador
-	// Establecemos los límites del jugador (ep_limit_nw y ep_limit_se) de tal forma que el jugador esté en el centro
+	// Márgenes adicionales para pre-cargar chunks fuera del área visible
+	const int margin_x = max_game_x / 4; // Por ejemplo, 25% adicional del ancho visible
+	const int margin_y = max_game_y / 4; // Por ejemplo, 25% adicional de la altura visible
 
-	// Calculamos los límites de la zona visible tomando la posición del jugador como el centro
-	player->ep_limit_nw.pos_x = (player_pos_x - max_game_x / 2) / CHUNK_N_TILES * CHUNK_N_TILES;
-	player->ep_limit_nw.pos_y = (player_pos_y - max_game_y / 2) / CHUNK_N_TILES * CHUNK_N_TILES;
+	// Ajustar los límites visibles considerando los márgenes
+	player->ep_limit_nw.pos_x = (player_pos_x - (max_game_x / 2) - margin_x) / CHUNK_N_TILES * CHUNK_N_TILES;
+	player->ep_limit_nw.pos_y = (player_pos_y - (max_game_y / 2) - margin_y) / CHUNK_N_TILES * CHUNK_N_TILES;
 
-	player->ep_limit_se.pos_x = (player_pos_x + max_game_x / 2) / CHUNK_N_TILES * CHUNK_N_TILES;
-	player->ep_limit_se.pos_y = (player_pos_y + max_game_y / 2) / CHUNK_N_TILES * CHUNK_N_TILES;
+	player->ep_limit_se.pos_x = (player_pos_x + (max_game_x / 2) + margin_x) / CHUNK_N_TILES * CHUNK_N_TILES;
+	player->ep_limit_se.pos_y = (player_pos_y + (max_game_y / 2) + margin_y) / CHUNK_N_TILES * CHUNK_N_TILES;
 }
-
 void draw_ui(int ticks_elapsed, double tps, char current_c) {
 	wclear(info_win);
 
@@ -219,9 +219,15 @@ void handle_input(int *game) {
 
 
 
+
+
 void draw_game_content(int ticks_elapsed) {
-	int32_t i, j;
-	int32_t start_x, start_y;
+	int32_t i, j;                 // Índices para iterar filas y columnas en la pantalla
+	int32_t start_x, start_y;     // Coordenadas globales iniciales (origen en la pantalla)
+	int32_t global_x, global_y;   // Coordenadas globales del tile actual
+	int32_t chunk_x, chunk_y;     // Coordenadas del chunk que contiene el tile
+	int32_t tile_x, tile_y;       // Coordenadas del tile dentro del chunk
+	struct LoadedChunk *chunk;    // Puntero al chunk correspondiente
 
 	// Calcular las posiciones globales iniciales (origen en la pantalla)
 	start_x = pj_generic->pos.pos_x - (max_game_x / 2);
@@ -231,37 +237,31 @@ void draw_game_content(int ticks_elapsed) {
 	for (i = 0; i < max_game_y; i++) {
 		for (j = 0; j < max_game_x; j++) {
 			// Calcular las coordenadas globales de cada tile
-			int global_x = start_x + j;
-			int global_y = start_y + (max_game_y - i - 1); // Invertir el eje Y
+			global_x = start_x + j;
+			global_y = start_y + i;
 
-			// Determinar las coordenadas del chunk que contiene el tile
-			int chunk_x = global_x / 16;
-			int chunk_y = global_y / 16;
+			// Ajustar para chunks negativos correctamente
+			chunk_x = (global_x >= 0) ? global_x / 16 : (global_x - 15) / 16;
+			chunk_y = (global_y >= 0) ? global_y / 16 : (global_y - 15) / 16;
 
-			// Ajustar coordenadas para números negativos
-			if (global_x < 0) chunk_x = (global_x - 15) / 16;
-			if (global_y < 0) chunk_y = (global_y - 15) / 16;
-
-			// Calcular el índice del chunk en `client_chunks`
-			int chunk_index = (chunk_x - (pj_generic->pos.pos_x / 16 - max_game_x / 32)) + 
-				(chunk_y - (pj_generic->pos.pos_y / 16 - max_game_y / 32)) * (max_game_x / 16);
-
-			// Verificar si el índice del chunk es válido
-			if (chunk_index < 0 || chunk_index >= (max_game_x / 16) * (max_game_y / 16)) {
+			// Usar findChunk en lugar de índices directos para buscar el chunk
+			chunk = findChunk(chunk_x, chunk_y, pj_generic->location, client_chunks, 256);
+			if (!chunk) {
+				// Si el chunk no está cargado, no hacemos nada
 				continue;
 			}
 
 			// Calcular las coordenadas del tile dentro del chunk
-			int tile_x = (global_x % 16 + 16) % 16;
-			int tile_y = (global_y % 16 + 16) % 16;
+			tile_x = (global_x % 16 + 16) % 16; // Ajuste modular para negativos
+			tile_y = (global_y % 16 + 16) % 16; // Ajuste modular para negativos
 
-			// Verificar si el tile existe dentro del chunk
-			if (!client_chunks[chunk_index].tile || !client_chunks[chunk_index].tile[tile_y]) {
+			// Verificar si los datos del tile son válidos
+			if (!chunk->tile || tile_y < 0 || tile_y >= 16 || tile_x < 0 || tile_x >= 16) {
 				continue;
 			}
 
 			// Dibujar el bloque individual
-			p_natural_block(client_chunks[chunk_index].tile[tile_y][tile_x], ticks_elapsed % 96, j, i);
+			p_natural_block(chunk->tile[tile_y][tile_x], ticks_elapsed % 96, j, i);
 		}
 	}
 }

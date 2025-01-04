@@ -167,6 +167,7 @@ void decompress_chunk16(struct PackedValues16 *, int16_t, struct LoadedChunk *);
 void gen_spawn_areas(int32_t);
 void gen_chunk(int32_t, struct LoadedChunk *);
 int32_t perlinint32(int32_t, int32_t, uint32_t); 
+struct LoadedChunk *findChunk(int32_t, int32_t, struct Locator, struct LoadedChunk*, int32_t);
 
 int32_t tick(int32_t, struct EventGeneric*, int32_t *, struct EventGeneric*);
 void handleMotionEvent(struct MotionEvent*);
