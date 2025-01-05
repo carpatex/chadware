@@ -221,6 +221,7 @@ void handle_input(int *game) {
 
 
 
+
 void draw_game_content(int ticks_elapsed) {
 	int32_t i, j;                 // Índices para iterar filas y columnas en la pantalla
 	int32_t start_x, start_y;     // Coordenadas globales iniciales (origen en la pantalla)
@@ -231,14 +232,14 @@ void draw_game_content(int ticks_elapsed) {
 
 	// Calcular las posiciones globales iniciales (origen en la pantalla)
 	start_x = pj_generic->pos.pos_x - (max_game_x / 2);
-	start_y = pj_generic->pos.pos_y - (max_game_y / 2);
+	start_y = pj_generic->pos.pos_y + (max_game_y / 2); // Nota: suma en lugar de resta para invertir el eje Y
 
 	// Iterar a través de cada tile visible en la pantalla
 	for (i = 0; i < max_game_y; i++) {
 		for (j = 0; j < max_game_x; j++) {
 			// Calcular las coordenadas globales de cada tile
 			global_x = start_x + j;
-			global_y = start_y + i;
+			global_y = start_y - i; // Nota: resta en lugar de suma para invertir el eje Y
 
 			// Ajustar para chunks negativos correctamente
 			chunk_x = (global_x >= 0) ? global_x / 16 : (global_x - 15) / 16;
