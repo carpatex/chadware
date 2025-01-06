@@ -180,8 +180,8 @@ void handle_resize() {
 	int32_t player_pos_y = player_entity->pos.pos_y;
 
 	// Márgenes adicionales para pre-cargar chunks fuera del área visible
-	const int margin_x = max_game_x / 4; // Por ejemplo, 25% adicional del ancho visible
-	const int margin_y = max_game_y / 4; // Por ejemplo, 25% adicional de la altura visible
+	const int margin_x = max_game_x / 3; // Por ejemplo, 33% adicional del ancho visible
+	const int margin_y = max_game_y / 3; // Por ejemplo, 33% adicional de la altura visible
 
 	// Ajustar los límites visibles considerando los márgenes
 	player->ep_limit_nw.pos_x = (player_pos_x - (max_game_x / 2) - margin_x) / CHUNK_N_TILES * CHUNK_N_TILES;
