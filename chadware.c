@@ -111,24 +111,85 @@ int init_chadware(int32_t n_players, char* player_names[]) {
 	// do world gen
 	return 0;
 }
+void handleGenChunkEvent(struct GenChunkEvent *event) {
+	int32_t chunk_count = 0;
+
+	// Localizar al jugador
+	struct EntityGeneric *player_entity = &entityg_ptr[event->entity_index];
+	if (!player_entity || !player_entity->data) {
+		fprintf(stderr, "Entidad de jugador no válida en índice %d.\n", event->entity_index);
+		return;
+	}
+
+	// Obtener datos específicos del jugador
+	struct EntityPlayer *player = (struct EntityPlayer *)player_entity->data;
+
+	// Calcular límites en coordenadas de "chunk"
+	int32_t start_chunk_x = player->ep_limit_nw.pos_x / CHUNK_N_TILES;
+	int32_t start_chunk_y = player->ep_limit_nw.pos_y / CHUNK_N_TILES;
+	int32_t end_chunk_x = player->ep_limit_se.pos_x / CHUNK_N_TILES;
+	int32_t end_chunk_y = player->ep_limit_se.pos_y / CHUNK_N_TILES;
+
+	// Generar "chunks" dentro de los límites del jugador
+	for (int y = start_chunk_y; y <= end_chunk_y; y++) {
+		for (int x = start_chunk_x; x <= end_chunk_x; x++) {
+			if (chunk_count >= event->target_size) {
+				fprintf(stderr, "Se superó el tamaño máximo de 'target'.\n");
+				return;
+			}
+
+			// Verificar si el chunk ya existe usando findChunk
+			if (findChunk(x, y, player_entity->location, event->target, chunk_count)) {
+				continue; // Chunk ya cargado, saltar
+			}
+
+			struct LoadedChunk *current_chunk = &event->target[chunk_count];
+
+			// Inicializar coordenadas y datos del chunk
+			current_chunk->start_pos_x = x * CHUNK_N_TILES;
+			current_chunk->start_pos_y = y * CHUNK_N_TILES;
+			current_chunk->location = player_entity->location;
+
+			// Generar el chunk
+			gen_chunk(seed, current_chunk);
+
+			// Validar el chunk generado
+			if (!current_chunk->tile) {
+				fprintf(stderr, "El chunk generado en (%d, %d) no contiene datos.\n", x, y);
+				continue;
+			}
+
+			chunk_count++;
+		}
+	}
+}
 int32_t tick(int32_t n_event_in, struct EventGeneric *event_in_list, int32_t *n_event_out, struct EventGeneric *event_out_list) {
 	int32_t i;
 	for (i = 0; i < n_event_in; i++) {
 		switch (event_in_list[i].event_id) {
-			case -1:
+			case -1: // Termination event
 				free(heap);
 				return 1;
-			case 2: // movement 
-				handleMotionEvent((struct MotionEvent*) event_in_list[i].data);
-			default:
+
+			case 2: // Movement event
+				handleMotionEvent((struct MotionEvent *) event_in_list[i].data);
+				break;
+
+			case 3: // Chunk generation event
+				handleGenChunkEvent((struct GenChunkEvent *) event_in_list[i].data);
+				break;
+
+			default: // Invalid event
 				fprintf(stderr, "Invalid event id %d.\n", event_in_list[i].event_id);
+				break;
 		}
 	}
-	if(curr_tick == UINT32_MAX) {
+
+	// Update the tick and epoch if necessary
+	if (curr_tick == UINT32_MAX) {
 		curr_tick = 0;
 		curr_tick_epoch++;
 	}
 
 	return 0;
 }
-

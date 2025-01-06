@@ -70,6 +70,10 @@ struct NPC {
 	int32_t civ;
 	int16_t role;
 };
+struct EntityPosition {
+	int32_t pos_x;
+	int32_t pos_y;
+};
 struct EntityPositionSurface {
 	int32_t pos_x;
 	int8_t motion_pos_x;
@@ -91,6 +95,8 @@ struct Item {
 	void *extra_data;
 };
 struct EntityPlayer {
+	struct EntityPosition ep_limit_nw;
+	struct EntityPosition ep_limit_se;
 	int32_t max_hp;
 	int32_t hp;
 	int32_t xp;
@@ -105,6 +111,11 @@ struct EventGeneric { //general struct for events. each particular type of event
 	int32_t event_id;
 	size_t data_size;
 	void *data;
+};
+struct GenChunkEvent {
+	int32_t entity_index;
+	size_t target_size;
+	struct LoadedChunk* target;
 };
 struct MotionEvent { // struct for movement of entities &/or players
 	struct EntityGeneric *target;
@@ -156,6 +167,7 @@ void decompress_chunk16(struct PackedValues16 *, int16_t, struct LoadedChunk *);
 void gen_spawn_areas(int32_t);
 void gen_chunk(int32_t, struct LoadedChunk *);
 int32_t perlinint32(int32_t, int32_t, uint32_t); 
+struct LoadedChunk *findChunk(int32_t, int32_t, struct Locator, struct LoadedChunk*, int32_t);
 
 int32_t tick(int32_t, struct EventGeneric*, int32_t *, struct EventGeneric*);
 void handleMotionEvent(struct MotionEvent*);
