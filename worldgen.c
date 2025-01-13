@@ -87,7 +87,7 @@ void gen_chunk_earth_surface(int32_t seed, struct LoadedChunk* chunk) {
 	for (i = 0; i < CHUNK_N_TILES; i++) {
 		for (j = 0; j < CHUNK_N_TILES; j++) {
 			curr_tile_temp = get_earth_temp(chunk->location, seed, chunk->start_pos_x + j, chunk->start_pos_y + i);
-			curr_tile_humidity = get_earth_humidity(chunk->location, seed, chunk->start_pos_y + j + 1, chunk->start_pos_x + i - 1);
+			curr_tile_humidity = get_earth_humidity(chunk->location, ~seed, chunk->start_pos_x + j, chunk->start_pos_y + i);
 			curr_height = perlinint32(chunk->start_pos_x + j, chunk->start_pos_y + i, seed) / 62500; // 24 capas posibles, las primeras 8 son subterráneas
 
 			// Agua
